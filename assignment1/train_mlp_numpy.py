@@ -14,167 +14,118 @@
 # Date Created: 2025-10-28
 ################################################################################
 """
-This module implements training and evaluation of a multi-layer perceptron in NumPy.
+This module implements a multi-layer perceptron (MLP) in NumPy.
 You should fill in code into indicated sections.
 """
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import argparse
-import numpy as np
-import os
-from tqdm.auto import tqdm
-from copy import deepcopy
-from mlp_numpy import MLP
-from modules import CrossEntropyModule
-import cifar10_utils
+from modules import *
 
-import torch
-
-
-def accuracy(predictions, targets):
+class MLP(ModuleList):
     """
-    Computes the prediction accuracy, i.e. the average of correct predictions
-    of the network.
-
-    Args:
-      predictions: 2D float array of size [batch_size, n_classes], predictions of the model (logits)
-      labels: 1D int array of size [batch_size]. Ground truth labels for
-              each sample in the batch
-    Returns:
-      accuracy: scalar float, the accuracy of predictions between 0 and 1,
-                i.e. the average correct predictions over the whole batch
-
-    TODO:
-    Implement accuracy computation.
+    This class implements a Multi-layer Perceptron in NumPy.
+    It handles the different layers and parameters of the model.
+    Once initialized an MLP object can perform forward and backward.
     """
 
-    #######################
-    # PUT YOUR CODE HERE  #
-    #######################
+    def __init__(self, n_inputs, n_hidden, n_classes, alpha=0.5):
+        """
+        Initializes MLP object.
 
-    #######################
-    # END OF YOUR CODE    #
-    #######################
+        Args:
+          n_inputs: number of inputs.
+          n_hidden: list of ints, specifies the number of units
+                    in each linear layer. If the list is empty, the MLP
+                    will not have any linear layers, and the model
+                    will simply perform a multinomial logistic regression.
+          n_classes: number of classes of the classification problem.
+                     This number is required in order to specify the
+                     output dimensions of the MLP
+          alpha: alpha parameter for the ELU activation function.
+        TODO:
+        Implement initialization of the network.
+        """
+        modules = [LinearModule(n_inputs, n_hidden[0], input_layer=True), ELUModule(alpha=alpha)]
+        for i in range(len(n_hidden)-1):
+            modules.append(LinearModule(n_hidden[i], n_hidden[i+1]))
+            modules.append(ELUModule(alpha=alpha))
+        modules.append(LinearModule(n_hidden[-1], n_classes))  # output layer
+        if n_classes > 1:
+            modules.append(SoftMaxModule())
+        super(MLP, self).__init__(modules)
+  
+        #######################
+        # END OF YOUR CODE    #
+        #######################
 
-    return accuracy
+    def forward(self, x):
+        """
+        Performs forward pass of the input. Here an input tensor x is transformed through
+        several layer transformations.
 
+        Args:
+          x: input to the network
+        Returns:
+          out: outputs of the network
 
-def evaluate_model(model, data_loader):
-    """
-    Performs the evaluation of the MLP model on a given dataset.
+        TODO:
+        Implement forward pass of the network.
+        """
 
-    Args:
-      model: An instance of 'MLP', the model to evaluate.
-      data_loader: The data loader of the dataset to evaluate.
-    Returns:
-      avg_accuracy: scalar float, the average accuracy of the model on the dataset.
+        #######################
+        # PUT YOUR CODE HERE  #
+        #######################
+        # Forward pass is implemented in the ModuleList class. We don't need this method implemented here, 
+        # but we add it for the sake of consistency with the exercise requirements.
+        out = super(MLP, self).forward(x)
+        #######################
+        # END OF YOUR CODE    #
+        #######################
 
-    TODO:
-    Implement evaluation of the MLP model on a given dataset.
+        return out
 
-    Hint: make sure to return the average accuracy of the whole dataset, 
-          independent of batch sizes (not all batches might be the same size).
-    """
+    def backward(self, dout):
+        """
+        Performs backward pass given the gradients of the loss.
 
-    #######################
-    # PUT YOUR CODE HERE  #
-    #######################
+        Args:
+          dout: gradients of the loss
 
-    #######################
-    # END OF YOUR CODE    #
-    #######################
+        TODO:
+        Implement backward pass of the network.
+        """
 
-    return avg_accuracy
+        #######################
+        # PUT YOUR CODE HERE  #
+        #######################
+        # Backward pass is implemented in the ModuleList class. We don't need this method implemented here, 
+        # but we add it for the sake of consistency with the exercise requirements.
+        dout = super(MLP, self).backward(dout)
+        
+        
+        #######################
+        # END OF YOUR CODE    #
+        #######################
+        
 
+    def clear_cache(self):
+        """
+        Remove any saved tensors for the backward pass from any module.
+        Used to clean-up model from any remaining input data when we want to save it.
 
-def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
-    """
-    Performs a full training cycle of MLP model.
-
-    Args:
-      hidden_dims: A list of ints, specificying the hidden dimensionalities to use in the MLP.
-      lr: Learning rate of the SGD to apply.
-      batch_size: Minibatch size for the data loaders.
-      epochs: Number of training epochs to perform.
-      seed: Seed to use for reproducible results.
-      data_dir: Directory where to store/find the CIFAR10 dataset.
-    Returns:
-      model: An instance of 'MLP', the trained model that performed best on the validation set.
-      val_accuracies: A list of scalar floats, containing the accuracies of the model on the
-                      validation set per epoch (element 0 - performance after epoch 1)
-      test_accuracy: scalar float, average accuracy on the test dataset of the model that 
-                     performed best on the validation. Between 0.0 and 1.0
-      logging_dict: An arbitrary object containing logging information. This is for you to 
-                    decide what to put in here.
-
-    TODO:
-    - Implement the training of the MLP model. 
-    - Evaluate your model on the whole validation set each epoch.
-    - After finishing training, evaluate your model that performed best on the validation set, 
-      on the whole test dataset.
-    - Integrate _all_ input arguments of this function in your training. You are allowed to add
-      additional input argument if you assign it a default value that represents the plain training
-      (e.g. '..., new_param=False')
-
-    Hint: you can save your best model by deepcopy-ing it.
-    """
-
-    # Set the random seeds for reproducibility
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-
-    ## Loading the dataset
-    cifar10 = cifar10_utils.get_cifar10(data_dir)
-    cifar10_loader = cifar10_utils.get_dataloader(cifar10, batch_size=batch_size,
-                                                  return_numpy=True)
-
-    #######################
-    # PUT YOUR CODE HERE  #
-    #######################
-
-    # TODO: Initialize model and loss module
-    model = ...
-    loss_module = ...
-    # TODO: Training loop including validation
-    val_accuracies = ...
-    # TODO: Test best model
-    test_accuracy = ...
-    # TODO: Add any information you might want to save for plotting
-    logging_dict = ...
-    #######################
-    # END OF YOUR CODE    #
-    #######################
-
-    return model, val_accuracies, test_accuracy, logging_dict
-
-
-if __name__ == '__main__':
-    # Command line arguments
-    parser = argparse.ArgumentParser()
-    
-    # Model hyperparameters
-    parser.add_argument('--hidden_dims', default=[128], type=int, nargs='+',
-                        help='Hidden dimensionalities to use inside the network. To specify multiple, use " " to separate them. Example: "256 128"')
-    
-    # Optimizer hyperparameters
-    parser.add_argument('--lr', default=0.1, type=float,
-                        help='Learning rate to use')
-    parser.add_argument('--batch_size', default=128, type=int,
-                        help='Minibatch size')
-
-    # Other hyperparameters
-    parser.add_argument('--epochs', default=10, type=int,
-                        help='Max number of epochs')
-    parser.add_argument('--seed', default=42, type=int,
-                        help='Seed to use for reproducing results')
-    parser.add_argument('--data_dir', default='data/', type=str,
-                        help='Data directory where to store/find the CIFAR10 dataset.')
-
-    args = parser.parse_args()
-    kwargs = vars(args)
-
-    train(**kwargs)
-    # Feel free to add any additional functions, such as plotting of the loss curve here
+        TODO:
+        Iterate over modules and call the 'clear_cache' function.
+        """
+        
+        #######################
+        # PUT YOUR CODE HERE  #
+        #######################
+        # Clear cache is implemented in the ModuleList class. We don't need this method implemented here, 
+        # but we add it for the sake of consistency with the exercise requirements.
+        super(MLP, self).clear_cache()
+        #######################
+        # END OF YOUR CODE    #
+        #######################
     

@@ -20,6 +20,46 @@ You should fill in code into indicated sections.
 import numpy as np
 
 
+class ModuleList(object):
+  def __init__(self, modules):
+    self.modules = modules
+  
+  def forward(self, x):
+    for module in self.modules:
+      x = module.forward(x)
+    return x
+  
+  def backward(self, dout):
+    for module in reversed(self.modules):
+      dout = module.backward(dout)
+    return dout
+  
+  def clear_cache(self):
+    for module in self.modules:
+      module.clear_cache()
+      
+  def parameters(self):
+    """
+    Returns a list of parameter dictionaries from all modules that have them.
+    """
+    params = []
+    for module in self.modules:
+      if hasattr(module, 'params'):
+        params.append(module.params)
+    return params
+  
+  def gradients(self):
+    """
+    Returns a list of gradient dictionaries from all modules that have them.
+    """
+    grads = []
+    for module in self.modules:
+      if hasattr(module, 'grads'):
+        grads.append(module.grads)
+    return grads
+  
+
+
 class LinearModule(object):
     """
     Linear module. Applies a linear transformation to the input data.
@@ -50,7 +90,19 @@ class LinearModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-
+        # ELU has similar variance to ReLU, so we use the same variance for the weight initialization.
+        if input_layer:
+          # first layer doesn't have activation function, so we don't need to multiply by sqrt(2). We assume 
+          self.params['weight'] = np.random.randn(in_features, out_features) * np.sqrt(1 / out_features)
+        else:
+          self.params['weight'] = np.random.randn(out_features, in_features) * np.sqrt(2 / in_features) / np.sqrt(out_features)
+  
+        self.params['bias'] = np.zeros(out_features)
+        self.grads['weight'] = np.zeros((in_features, out_features))
+        self.grads['bias'] = np.zeros(out_features)
+        
+        self.cache = {'x': None}
+  
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -73,7 +125,9 @@ class LinearModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-
+        
+        out = x @ self.params['weight'].T + self.params['bias']
+        self.cache['x'] = x
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -97,7 +151,13 @@ class LinearModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-
+        # We use the equations developed in question 1 of HW1.
+        if isinstance(self.cache['x'], np.ndarray):
+          self.grads['weight'] = dout.T @ self.cache['x']
+          self.grads['bias'] = np.sum(dout, axis=0) # dL/db = dL/dy^T @ dy/db = dL/dy^T @ 1 
+          dx = dout @ self.params['weight']
+        else:
+          raise ValueError("Cache is not set. Probably forward pass was not called prior to backward pass.")
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -114,7 +174,8 @@ class LinearModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        
+        self.cache['x'] = None
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -127,6 +188,7 @@ class ELUModule(object):
 
     def __init__(self, alpha):
         self.alpha = alpha
+        self.cache = {'x': None}
 
     def forward(self, x):
         """
@@ -146,7 +208,10 @@ class ELUModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-
+        # according to the formula in the lecture notes
+        # we use the where function to implement the ELU function in vectorized form.
+        out = np.where(x > 0, x, self.alpha * (np.exp(x) - 1))
+        self.cache['x'] = x
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -168,7 +233,12 @@ class ELUModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-
+        # according to the formula in the lecture notes
+        # we use the where function to implement the ELU function in vectorized form.
+        if isinstance(self.cache['x'], np.ndarray):
+          dx = np.where(self.cache['x'] > 0, dout, self.alpha * np.exp(self.cache['x']) * dout)
+        else:
+          raise ValueError("Cache is not set. Probably forward pass was not called prior to backward pass.")
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -185,7 +255,7 @@ class ELUModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        self.cache['x'] = None
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -195,6 +265,9 @@ class SoftMaxModule(object):
     """
     Softmax activation module.
     """
+    
+    def __init__(self):
+        self.cache = {'x': None}
 
     def forward(self, x):
         """
@@ -214,7 +287,10 @@ class SoftMaxModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-
+        m = np.max(x, axis=1, keepdims=True)
+        # using the max trick to stabilize the computation
+        out = np.exp(x - m) / np.sum(np.exp(x - m), axis=1, keepdims=True)
+        self.cache['out'] = out
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -236,7 +312,12 @@ class SoftMaxModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-
+        # according to the formula in the lecture notes
+        if isinstance(self.cache['out'], np.ndarray):
+          dx = np.sum(dout[..., :, None] * (self.cache['out'][..., :, None] * (np.eye(self.cache['out'].shape[-1])[None, ...] - self.cache['out'][..., None, :])), axis=1)
+        else:
+          raise ValueError("Cache is not set. Probably forward pass was not called prior to backward pass.")
+        
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -254,7 +335,7 @@ class SoftMaxModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        self.cache['out'] = None
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -276,12 +357,15 @@ class CrossEntropyModule(object):
 
         TODO:
         Implement forward pass of the module.
+        
         """
 
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-
+        # We use the cross entropy loss formula: L = -1/N * sum(y_i * log(p_i)). 
+        # X is the output of the softmax layer, which is the probability of each class.
+        out = -np.sum(np.log(x[np.arange(len(y)), y])) / x.shape[0]
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -300,11 +384,15 @@ class CrossEntropyModule(object):
         TODO:
         Implement backward pass of the module.
         """
+        
 
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+        # according to the formula in the lecture notes
+        dx = np.zeros_like(x)  # Start with all zeros, shape (N, C)
 
+        dx[np.arange(len(y)), y] = -1 / (x[np.arange(len(y)), y] * x.shape[0])
         #######################
         # END OF YOUR CODE    #
         #######################
