@@ -93,12 +93,12 @@ class LinearModule(object):
         # ELU has similar variance to ReLU, so we use the same variance for the weight initialization.
         if input_layer:
           # first layer doesn't have activation function, so we don't need to multiply by sqrt(2). We assume 
-          self.params['weight'] = np.random.randn(in_features, out_features) * np.sqrt(1 / out_features)
+          self.params['weight'] = np.random.randn(out_features, in_features) * np.sqrt(1 / out_features)
         else:
-          self.params['weight'] = np.random.randn(out_features, in_features) * np.sqrt(2 / in_features) / np.sqrt(out_features)
+          self.params['weight'] = np.random.randn(out_features, in_features) * np.sqrt(2 / in_features)
   
         self.params['bias'] = np.zeros(out_features)
-        self.grads['weight'] = np.zeros((in_features, out_features))
+        self.grads['weight'] = np.zeros((out_features, in_features))
         self.grads['bias'] = np.zeros(out_features)
         
         self.cache = {'x': None}

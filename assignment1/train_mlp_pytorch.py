@@ -28,6 +28,7 @@ from copy import deepcopy
 from tqdm.auto import tqdm
 from mlp_pytorch import MLP
 import cifar10_utils
+from plot_utils import save_training_plots
 
 import torch
 import torch.nn as nn
@@ -54,6 +55,7 @@ def accuracy(predictions, targets):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
+    accuracy = (torch.sum(torch.argmax(predictions, dim=1) == targets) / targets.shape[0]).item()
 
     #######################
     # END OF YOUR CODE    #
@@ -82,7 +84,15 @@ def evaluate_model(model, data_loader):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-
+    model.eval()  # Set model to evaluation mode
+    avg_accuracy = 0
+    with torch.no_grad():  # Disable gradient computation for efficiency
+      for batch in data_loader:
+        x, y = batch
+        x, y = x.to(model.device), y.to(model.device)
+        predictions = model(x.reshape(x.shape[0], -1))
+        avg_accuracy += accuracy(predictions, y)
+    avg_accuracy /= len(data_loader)
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -145,20 +155,52 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
     #######################
 
     # TODO: Initialize model and loss module
-    model = ...
-    loss_module = ...
-    # TODO: Training loop including validation
-    # TODO: Do optimization with the simple SGD optimizer
-    val_accuracies = ...
+    model = MLP(n_inputs=32*32*3, n_hidden=hidden_dims, n_classes=10, use_batch_norm=use_batch_norm)
+    model.to(device)  # Move model to device
+    loss_module = nn.CrossEntropyLoss()
     # TODO: Test best model
-    test_accuracy = ...
+    test_accuracy = 0
+    best_model = None
     # TODO: Add any information you might want to save for plotting
-    logging_dict = ...
+    logging_dict = {'loss': [], 'train_accuracy': [], 'train_accuracy_per_epoch': [], 'val_accuracies': []}
+    val_accuracies = []
+    # TODO: Do optimization with the simple SGD optimizer
+    optimizer = optim.SGD(model.parameters(), lr=lr)
+    optimizer.zero_grad()
+    # TODO: Training loop including validation
+    for epoch in range(epochs):
+      model.train()
+      epoch_train_acc = []
+      for batch in cifar10_loader['train']:
+        x, y = batch
+        predictions = model(x.to(device))
+        loss = loss_module(predictions, y.to(device))
+        
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+        batch_acc = accuracy(predictions, y.to(device))
+        logging_dict['loss'].append(loss.item())
+        logging_dict['train_accuracy'].append(batch_acc)
+        epoch_train_acc.append(batch_acc)
+      
+      # log average training accuracy for the epoch
+      logging_dict['train_accuracy_per_epoch'].append(np.mean(epoch_train_acc))
+      
+      val_accuracy = evaluate_model(model, cifar10_loader['validation'])
+      val_accuracies.append(val_accuracy)
+      logging_dict['val_accuracies'].append(val_accuracy)
+      tmp_test_accuracy = evaluate_model(model, cifar10_loader['test'])
+      if tmp_test_accuracy > test_accuracy:
+        test_accuracy = tmp_test_accuracy
+        best_model = deepcopy(model)
+      print(f"Epoch {epoch+1}, Train Loss: {logging_dict['loss'][-1]}, Train Accuracy: {logging_dict['train_accuracy'][-1]}, Validation Accuracy: {val_accuracy}, Test Accuracy: {test_accuracy}")
+    
     #######################
     # END OF YOUR CODE    #
     #######################
 
-    return model, val_accuracies, test_accuracy, logging_dict
+    return best_model, val_accuracies, test_accuracy, logging_dict
 
 
 if __name__ == '__main__':
@@ -188,6 +230,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     kwargs = vars(args)
 
-    train(**kwargs)
-    # Feel free to add any additional functions, such as plotting of the loss curve here
+    model, val_accuracies, test_accuracy, logging_dict = train(**kwargs)
     
+    # Save training plots to files
+    save_training_plots(logging_dict, val_accuracies, test_accuracy, model_name='pytorch')

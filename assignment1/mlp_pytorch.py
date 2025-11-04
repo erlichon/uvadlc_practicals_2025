@@ -59,7 +59,28 @@ class MLP(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        super(MLP, self).__init__()
+        layers = []
+        
+        # Build hidden layers
+        prev_dim = n_inputs
+        for hidden_dim in n_hidden:
+          layers.append(nn.Linear(prev_dim, hidden_dim))
+          if use_batch_norm:
+            layers.append(nn.BatchNorm1d(hidden_dim))
+          layers.append(nn.ELU())
+          prev_dim = hidden_dim
+        
+        # Add output layer (no activation after this!)
+        layers.append(nn.Linear(prev_dim, n_classes))
+        
+        self.model = nn.Sequential(*layers)
+        
+        # Initialize the weights and biases of the model with Kaiming initialization
+        for layer in self.model:
+          if isinstance(layer, nn.Linear):
+            nn.init.kaiming_normal_(layer.weight, nonlinearity='relu')
+            nn.init.zeros_(layer.bias)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -81,6 +102,7 @@ class MLP(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+        out = self.model(x.view(x.shape[0], -1))
 
         #######################
         # END OF YOUR CODE    #
