@@ -139,12 +139,12 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
     # PUT YOUR CODE HERE  #
     #######################
     # TODO: Initialize model and loss module
-    print(cifar10['train'].dataset[0][0].shape)
     size = np.prod(cifar10['train'].dataset[0][0].shape)
     model = MLP(n_inputs=size, n_hidden=hidden_dims, n_classes=10)
     loss_module = CrossEntropyModule()
     # TODO: Training loop including validation
     val_accuracies = []
+    best_val_accuracy = 0
     test_accuracy = 0
     best_model = None
     # TODO: Add any information you might want to save for plotting
@@ -152,10 +152,8 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
       'loss': [],
       'train_accuracy': [],
       'train_accuracy_per_epoch': [],
-      'val_accuracies': [],
     }
     for epoch in range(epochs):
-      epoch_train_acc = []
       for batch in cifar10_loader['train']:
         x, y = batch
         predictions = model.forward(x.reshape(x.shape[0], -1))
@@ -167,33 +165,34 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
         for param, grad in zip(params, grads) :
           param['weight'] -= lr * grad['weight']
           param['bias'] -= lr * grad['bias']
-        # clear the cache
+        # clear the cache after backward pass
         model.clear_cache()  
         
         # log the loss and train accuracy for each batch
         batch_acc = accuracy(predictions, y)
         logging_dict['loss'].append(loss)
         logging_dict['train_accuracy'].append(batch_acc)
-        epoch_train_acc.append(batch_acc)
       
-      # log average training accuracy for the epoch
-      logging_dict['train_accuracy_per_epoch'].append(np.mean(epoch_train_acc))
-         
+      # logging training accuracy for the epoch
+      train_accuracy_per_epoch = evaluate_model(model, cifar10_loader['train'])
+      logging_dict['train_accuracy_per_epoch'].append(train_accuracy_per_epoch)
+      
       # evaluate the model after each epoch on the validation set and log the accuracy
-      logging_dict['val_accuracies'].append(evaluate_model(model, cifar10_loader['validation']))
-      
-      # evaluate the model after each epoch on the test set and update the best model if the accuracy is higher
-      tmp_test_accuracy = evaluate_model(model, cifar10_loader['test'])
-      if tmp_test_accuracy > test_accuracy:
-        test_accuracy = tmp_test_accuracy
+      val_accuracy = evaluate_model(model, cifar10_loader['validation'])
+      val_accuracies.append(val_accuracy)
+      if val_accuracy > best_val_accuracy:
+        best_val_accuracy = val_accuracy
         best_model = deepcopy(model)
-      print(f"Epoch {epoch+1}, Train Loss: {logging_dict['loss'][-1]}, Train Accuracy: {logging_dict['train_accuracy'][-1]}, Validation Accuracy: {logging_dict['val_accuracies'][-1]}, Test Accuracy: {test_accuracy}")
       
+      print(f"Epoch {epoch+1}, Last batch Train Loss: {logging_dict['loss'][-1]}, Train Accuracy: {logging_dict['train_accuracy_per_epoch'][-1]}, Validation Accuracy: {val_accuracy}")      
     #######################
     # END OF YOUR CODE    #
     #######################
+    # Evaluate best model on test set ONLY ONCE at the end
+    test_accuracy = evaluate_model(best_model, cifar10_loader['test'])
+    print(f"\nFinal Test Accuracy (best validation model): {test_accuracy}")
 
-    return best_model, logging_dict['val_accuracies'], test_accuracy, logging_dict
+    return best_model, val_accuracies, test_accuracy, logging_dict
 
 
 if __name__ == '__main__':

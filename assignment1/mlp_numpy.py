@@ -31,7 +31,7 @@ class MLP(ModuleList):
     Once initialized an MLP object can perform forward and backward.
     """
 
-    def __init__(self, n_inputs, n_hidden, n_classes, alpha=0.5):
+    def __init__(self, n_inputs, n_hidden, n_classes, alpha=1):
         """
         Initializes MLP object.
 
@@ -45,14 +45,15 @@ class MLP(ModuleList):
                      This number is required in order to specify the
                      output dimensions of the MLP
           alpha: alpha parameter for the ELU activation function.
+          Default value is 1, which is the same as the default value for the PyTorch ELU activation function.
         TODO:
         Implement initialization of the network.
         """
         modules = [LinearModule(n_inputs, n_hidden[0], input_layer=True), ELUModule(alpha=alpha)]
         for i in range(len(n_hidden)-1):
-            modules.append(LinearModule(n_hidden[i], n_hidden[i+1]))
+            modules.append(LinearModule(n_hidden[i], n_hidden[i+1], input_layer=False))
             modules.append(ELUModule(alpha=alpha))
-        modules.append(LinearModule(n_hidden[-1], n_classes))  # output layer
+        modules.append(LinearModule(n_hidden[-1], n_classes, input_layer=False))  # output layer
         if n_classes > 1:
             modules.append(SoftMaxModule())
         super(MLP, self).__init__(modules)

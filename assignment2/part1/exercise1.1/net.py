@@ -6,6 +6,7 @@ Experiment with different convolution types
 
 import torch
 import numpy as np
+import pandas as pd
 np.random.seed(42)  # for reproducibility
 torch.backends.cudnn.deterministic = True
 torch.manual_seed(42)
@@ -18,6 +19,19 @@ import torch.optim as optim
 from torch.autograd import Variable
 import argparse
 from utils import gen_box_data, gen_box_data_test
+
+
+def get_device():
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+        print('Using CUDA GPU')
+    elif torch.backends.mps.is_available():
+        device = torch.device('mps')
+        print('Using MPS (Apple Silicon GPU)')
+    else:
+        device = torch.device('cpu')
+        print('Using CPU')
+    return device
 
 class Net(nn.Module):
     '''
@@ -98,8 +112,8 @@ if __name__ == '__main__':
     parser.add_argument("--train_size", type=int, default=2000, help="training set size")
     parser.add_argument("--val_size", type=int, default=1000, help="validation set size")
     parser.add_argument("--test_size", type=int, default=1000, help="test set size")
-    parser.add_argument("--conv_type", type=str, default='fconv',
-                        help="please choose convolution type from 'valid', 'sconv','fconv','circular', 'reflect', 'replicate'")
+    parser.add_argument("--conv_type", type=str, default='all',
+                        help="please choose convolution type from 'valid', 'sconv','fconv','circular', 'reflect', 'replicate', 'all' where 'all will run all of the conv types")
     parser.add_argument("--net_type", type=str, default='Net1', help="please choose network type from 'Net1' and 'Net2'")
     parser.add_argument("--image_size", type=int, default=32, help="spatial size of sample image")
     parser.add_argument("--offset1", type=int, default=7, help="offset for class-1")
@@ -110,11 +124,20 @@ if __name__ == '__main__':
                         help="training the network with n different initializations")
     parser.add_argument("--epochs", type=int, default=50, help="number of epochs")
     parser.add_argument("--batch_size", type=int, default=200, help="size of each image batch")
+    parser.add_argument("--save_results", action='store_true', help="save results to a csv file")
+    parser.add_argument("--results_file", type=str, default='', help="file_path to save results to. defaults to results_{conv_type}_{net_type}.csv")
+
 
     opt = parser.parse_args()
+    if opt.save_results:
+        if opt.results_file == '':
+            opt.results_file = f'results_{opt.conv_type}_{opt.net_type}.csv'
+
     print(opt)
 
-    use_gpu = torch.cuda.is_available()
+    # Device selection: CUDA > MPS > CPU
+    device = get_device()
+    use_gpu = device.type in ['cuda', 'mps']
     net_model = 'net_model_wts.pth'
     conv_type = opt.conv_type
     net_type = opt.net_type
@@ -178,185 +201,210 @@ if __name__ == '__main__':
     results_val = {}  # dict for validation set
     results_test = {}  # dict for  testset
 
-    for m in range(opt.n_repeat):
 
-        print('Round  :{:4d}'.format(m + 1))
+    if conv_type == 'all':
+        conv_types = ['valid', 'sconv','fconv','circular', 'reflect', 'replicate']
+    else:
+        conv_types = [conv_type]
+    
+    
+    results_list = []  # Collect results as list of dicts
+    for conv_type in conv_types:
+        for m in range(opt.n_repeat):
 
-        #******************************************************************#
-        ###****************** MODEL INITIALISATION **********************###
-        #******************************************************************#
+            print('Round  :{:4d}'.format(m + 1))
 
-        torch.manual_seed(m)
-        net = Net(conv_type=conv_type, net_type=net_type)
-        if use_gpu:
-            net = net.cuda()
-        print(net)
-        param_size = 0
-        for param in net.parameters():
-            param_size += param.nelement() * param.element_size()
-        buffer_size = 0
-        for buffer in net.buffers():
-            buffer_size += buffer.nelement() * buffer.element_size()
+            #******************************************************************#
+            ###****************** MODEL INITIALISATION **********************###
+            #******************************************************************#
 
-        size_all_kb = (param_size + buffer_size) / 1024
-        print('Model size: {:.3f}KB'.format(size_all_kb))
-
-        #******************************************************************#
-        ###******************** TRAINING/TESTING ************************###
-        #******************************************************************#
-
-        ''' Loss functions and optimizer '''
-        criterion_class = nn.CrossEntropyLoss()
-        optimizer = optim.Adadelta([{'params': net.parameters()}], lr=1.0, rho=0.9,
-                                    eps=1e-06, weight_decay=0.00005)
-
-        # Training
-
-        print('Training is starting...')
-        net.train()
-        best = 50.0
-        patience = 0
-        flag = True
-        for epoch in range(opt.epochs):
-            train_loss = 0.0
-            counter = 0.0
-            total = 0.0
-            train_corrects = 0.0
-
-            if flag:
-
-                for i, data in enumerate(trainloader, 0):
-                    images = data[0]
-                    label_class = data[1]
-                    images = images.type(torch.FloatTensor)
-                    label_class = label_class.type(torch.LongTensor)
-
-                    if use_gpu:
-                        images = Variable(images.cuda())
-                        label_class = Variable(label_class.cuda())
-                    else:
-                        images, label_class = Variable(images), Variable(label_class)
-
-                    optimizer.zero_grad()
-                    outputs_class = net(images)
-
-                    _, predicted = torch.max(outputs_class, 1)
-                    loss = criterion_class(outputs_class, label_class)
-
-                    loss.backward()
-                    optimizer.step()
-                    # statistics
-                    train_loss += loss.item()
-                    train_corrects += torch.sum(predicted == label_class)
-                    counter += 1
-                    total += label_class.shape[0]
-
-                epoch_loss = train_loss / (counter)
-                epoch_acc = train_corrects.item() / (total)
-                print('Epoch:{:4d}'.format(epoch + 1))
-                print('Loss: {:.4f} Acc: {:.4f}'.format(epoch_loss, epoch_acc))
-
-                # Validation
-
-                val_loss = 0.0
-                correct = 0.0
-                total = 0.0
-
-                for data in valloader:
-                    images = data[0]
-                    images = images.type(torch.FloatTensor)
-                    label_class = data[1]
-                    label_class = label_class.type(torch.LongTensor)
-
-                    if use_gpu:
-                        images = Variable(images.cuda())
-                        label_class = Variable(label_class.cuda())
-
-                    outputs_class = net(images)
-
-                    loss_class = criterion_class(outputs_class, label_class)
-                    val_loss += loss_class.item()
-                    _, predicted = torch.max(outputs_class.data, 1)
-
-                    total += label_class.size(0)
-                    correct += torch.sum(predicted == label_class)
-
-                val_loss /= total
-                print('val loss: ', val_loss)
-                val_acc = 100 * correct.item() / (total)
-                print('Accuracy of the network on the val images: %.4f %%' % (val_acc))
-                
-                results_val[m] = val_acc
-
-                if best > val_loss:
-                    best = val_loss
-                    net_model_wts = net.state_dict()
-                    torch.save(net.state_dict(net_model_wts), net_model)
-                    patience = 0
-
-                elif patience < 8:
-                    patience += 1
-                    print('patience', patience)
-
-                elif patience >= 8:
-                    flag = False
-
-        print('Training finished.')
-
-        #  -------------------------------------------------
-        # Testing 
-        net.load_state_dict(torch.load(net_model))  # using best model
-
-        net.eval()
-        testing_loss = 0.0
-        correct = 0.0
-        total = 0.0
-
-        for data in testloader_diss:
-            images = data[0]
-            images = images.type(torch.FloatTensor)
-            label_class = data[1]
-            label_class = label_class.type(torch.LongTensor)
-
+            torch.manual_seed(m)
+            net = Net(conv_type=conv_type, net_type=net_type)
             if use_gpu:
-                images = Variable(images.cuda())
-                label_class = Variable(label_class.cuda())
+                net = net.to(device)
+            print(net)
+            param_size = 0
+            for param in net.parameters():
+                param_size += param.nelement() * param.element_size()
+            buffer_size = 0
+            for buffer in net.buffers():
+                buffer_size += buffer.nelement() * buffer.element_size()
 
-            outputs_class = net(images)
+            size_all_kb = (param_size + buffer_size) / 1024
+            print('Model size: {:.3f}KB'.format(size_all_kb))
 
-            loss_class = criterion_class(outputs_class, label_class)
-            testing_loss += loss_class.item()
-            _, predicted = torch.max(outputs_class.data, 1)
+            #******************************************************************#
+            ###******************** TRAINING/TESTING ************************###
+            #******************************************************************#
 
-            total += label_class.size(0)
-            correct += torch.sum(predicted == label_class)
+            ''' Loss functions and optimizer '''
+            criterion_class = nn.CrossEntropyLoss()
+            optimizer = optim.Adadelta([{'params': net.parameters()}], lr=1.0, rho=0.9,
+                                        eps=1e-06, weight_decay=0.00005)
 
-        testing_loss /= total
-        acc = 100 * correct.item() / (total)
-        print('testing loss: ', testing_loss)
-        print('Accuracy of the network on the testset images: %.4f %%' % (acc))
+            # Training
 
-        results_test[m] = acc
-        print('Testing with testset finished')
+            print('Training is starting...')
+            net.train()
+            best = 50.0
+            patience = 0
+            flag = True
+            for epoch in range(opt.epochs):
+                train_loss = 0.0
+                counter = 0.0
+                total = 0.0
+                train_corrects = 0.0
 
-    acc_val = np.zeros(m+1)
-    acc_test = np.zeros(m+1)
+                if flag:
 
-    for i in range(m+1):
+                    for i, data in enumerate(trainloader, 0):
+                        images = data[0]
+                        label_class = data[1]
+                        images = images.type(torch.FloatTensor)
+                        label_class = label_class.type(torch.LongTensor)
 
-        acc_val[i] = results_val[i]
-        acc_test[i] = results_test[i]
+                        if use_gpu:
+                            images = Variable(images.to(device))
+                            label_class = Variable(label_class.to(device))
+                        else:
+                            images, label_class = Variable(images), Variable(label_class)
 
-    mean_val = np.mean(acc_val)
-    std_val = np.std(acc_val)
-    mean_test = np.mean(acc_test)
-    std_test = np.std(acc_test)
+                        optimizer.zero_grad()
+                        outputs_class = net(images)
 
-    print("*******************************************")
-    print(" Type of convolution : ", conv_type)
-    print(" Type of network : ", net_type)
-    print("*******************************************")
-    print('Results for validation dataset', results_val)
-    print('mean: {:.4f} std: {:.4f} for validation'.format(mean_val, std_val))
-    print('Results for test dataset', results_test)
-    print('mean: {:.4f} std: {:.4f} for test'.format(mean_test, std_test))
+                        _, predicted = torch.max(outputs_class, 1)
+                        loss = criterion_class(outputs_class, label_class)
+
+                        loss.backward()
+                        optimizer.step()
+                        # statistics
+                        train_loss += loss.item()
+                        train_corrects += torch.sum(predicted == label_class)
+                        counter += 1
+                        total += label_class.shape[0]
+
+                    epoch_loss = train_loss / (counter)
+                    epoch_acc = train_corrects.item() / (total)
+                    print('Epoch:{:4d}'.format(epoch + 1))
+                    print('Loss: {:.4f} Acc: {:.4f}'.format(epoch_loss, epoch_acc))
+
+                    # Validation
+
+                    val_loss = 0.0
+                    correct = 0.0
+                    total = 0.0
+
+                    for data in valloader:
+                        images = data[0]
+                        images = images.type(torch.FloatTensor)
+                        label_class = data[1]
+                        label_class = label_class.type(torch.LongTensor)
+
+                        if use_gpu:
+                            images = Variable(images.to(device))
+                            label_class = Variable(label_class.to(device))
+
+                        outputs_class = net(images)
+
+                        loss_class = criterion_class(outputs_class, label_class)
+                        val_loss += loss_class.item()
+                        _, predicted = torch.max(outputs_class.data, 1)
+
+                        total += label_class.size(0)
+                        correct += torch.sum(predicted == label_class)
+
+                    val_loss /= total
+                    print('val loss: ', val_loss)
+                    val_acc = 100 * correct.item() / (total)
+                    print('Accuracy of the network on the val images: %.4f %%' % (val_acc))
+                    
+                    results_val[m] = val_acc
+
+                    if best > val_loss:
+                        best = val_loss
+                        net_model_wts = net.state_dict()
+                        torch.save(net.state_dict(net_model_wts), net_model)
+                        patience = 0
+
+                    elif patience < 8:
+                        patience += 1
+                        print('patience', patience)
+
+                    elif patience >= 8:
+                        flag = False
+
+            print('Training finished.')
+
+            #  -------------------------------------------------
+            # Testing 
+            net.load_state_dict(torch.load(net_model))  # using best model
+
+            net.eval()
+            testing_loss = 0.0
+            correct = 0.0
+            total = 0.0
+
+            for data in testloader_diss:
+                images = data[0]
+                images = images.type(torch.FloatTensor)
+                label_class = data[1]
+                label_class = label_class.type(torch.LongTensor)
+
+                if use_gpu:
+                    images = Variable(images.to(device))
+                    label_class = Variable(label_class.to(device))
+
+                outputs_class = net(images)
+
+                loss_class = criterion_class(outputs_class, label_class)
+                testing_loss += loss_class.item()
+                _, predicted = torch.max(outputs_class.data, 1)
+
+                total += label_class.size(0)
+                correct += torch.sum(predicted == label_class)
+
+            testing_loss /= total
+            acc = 100 * correct.item() / (total)
+            print('testing loss: ', testing_loss)
+            print('Accuracy of the network on the testset images: %.4f %%' % (acc))
+
+            results_test[m] = acc
+            print('Testing with testset finished')
+
+        acc_val = np.zeros(m+1)
+        acc_test = np.zeros(m+1)
+
+        for i in range(m+1):
+
+            acc_val[i] = results_val[i]
+            acc_test[i] = results_test[i]
+
+        mean_val = np.mean(acc_val)
+        std_val = np.std(acc_val)
+        mean_test = np.mean(acc_test)
+        std_test = np.std(acc_test)
+
+        print("*******************************************")
+        print(" Type of convolution : ", conv_type)
+        print(" Type of network : ", net_type)
+        print("*******************************************")
+        print('Results for validation dataset', results_val)
+        print('mean: {:.4f} std: {:.4f} for validation'.format(mean_val, std_val))
+        print('Results for test dataset', results_test)
+        print('mean: {:.4f} std: {:.4f} for test'.format(mean_test, std_test))
+        
+        # Append results to list instead of DataFrame
+        results_list.append({
+            'conv_type': conv_type, 
+            'net_type': net_type, 
+            'mean_val_acc': mean_val, 
+            'std_val_acc': std_val, 
+            'mean_test_acc': mean_test, 
+            'std_test_acc': std_test
+        })
+    
+    # Create DataFrame from list at the end
+    if opt.save_results:
+        results_df = pd.DataFrame(results_list)
+        results_df.to_csv(opt.results_file, index=False)
+        print(f'Results saved to {opt.results_file}')

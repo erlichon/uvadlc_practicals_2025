@@ -60,27 +60,35 @@ class MLP(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         super(MLP, self).__init__()
-        layers = []
+        layers = OrderedDict()
         
         # Build hidden layers
         prev_dim = n_inputs
-        for hidden_dim in n_hidden:
-          layers.append(nn.Linear(prev_dim, hidden_dim))
+        for i, hidden_dim in enumerate(n_hidden):
+          layers[f'linear_{i}'] = nn.Linear(prev_dim, hidden_dim)
+          # initialize layer weights and biases
+          if i == 0:
+            nn.init.kaiming_normal_(layers[f'linear_{i}'].weight, mode='fan_in', nonlinearity='linear')
+          else:
+            nn.init.kaiming_normal_(layers[f'linear_{i}'].weight, mode='fan_in', nonlinearity='relu')
+          nn.init.zeros_(layers[f'linear_{i}'].bias)
           if use_batch_norm:
-            layers.append(nn.BatchNorm1d(hidden_dim))
-          layers.append(nn.ELU())
+            layers[f'batch_norm_{i}'] = nn.BatchNorm1d(hidden_dim)
+            # using BatchNorm1d default initialization (gamma = 1, beta = 0)
+          layers[f'elu_{i}'] = nn.ELU()
           prev_dim = hidden_dim
         
-        # Add output layer (no activation after this!)
-        layers.append(nn.Linear(prev_dim, n_classes))
+        # Add output layer (no activation after this)
+        layers['output'] = nn.Linear(prev_dim, n_classes)
+        # initialize output layer weights and biases
+        if not n_hidden:
+          nn.init.kaiming_normal_(layers['output'].weight, mode='fan_in', nonlinearity='linear')
+        else:
+          nn.init.kaiming_normal_(layers['output'].weight, mode='fan_in', nonlinearity='relu')
+        nn.init.zeros_(layers['output'].bias)
         
-        self.model = nn.Sequential(*layers)
-        
-        # Initialize the weights and biases of the model with Kaiming initialization
-        for layer in self.model:
-          if isinstance(layer, nn.Linear):
-            nn.init.kaiming_normal_(layer.weight, nonlinearity='relu')
-            nn.init.zeros_(layer.bias)
+        self.model = nn.Sequential(layers)
+            
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -102,7 +110,7 @@ class MLP(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        out = self.model(x.view(x.shape[0], -1))
+        out = self.model(x)
 
         #######################
         # END OF YOUR CODE    #

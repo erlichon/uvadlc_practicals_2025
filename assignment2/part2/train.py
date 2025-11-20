@@ -15,7 +15,6 @@ from dataset import TextDataset, CharTokenizer
 from generate import generate as generate_pretrained
 from cfg import get_config
 
-
 class GPTLightningModule(pl.LightningModule):
 
     def __init__(self, config, model, train_dataset):
@@ -136,8 +135,10 @@ class GPTLightningModule(pl.LightningModule):
             sampler=RandomSampler(self.train_dataset, replacement=True),
             shuffle=False,
             drop_last=True, 
-            pin_memory=True,
+            # pin_memory=True
+            pin_memory=False,
             num_workers=self.config.num_workers,
+            persistent_workers=self.config.num_workers > 0,
         )
         return train_loader
 
@@ -205,5 +206,5 @@ def train(args):
 if __name__ == "__main__":
     args = get_config()
     args.device = ("cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")) 
-
+    print(args.device)
     train(args=args)

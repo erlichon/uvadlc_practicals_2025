@@ -29,10 +29,42 @@ from tqdm.auto import tqdm
 from mlp_pytorch import MLP
 import cifar10_utils
 from plot_utils import save_training_plots
+import json
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
+
+def save_metrics_to_json(logging_dict, val_accuracies, test_accuracy, model_name='pytorch', plots_dir='plots'):
+    """
+    Saves training metrics to a JSON file.
+    
+    Args:
+      logging_dict: Dictionary containing training metrics (loss, train_accuracy, etc.)
+      val_accuracies: List of validation accuracies per epoch
+      test_accuracy: Final test accuracy
+      model_name: Name prefix for the JSON file
+      plots_dir: Directory where to save the JSON file (same as plots directory)
+    """
+    # Ensure the directory exists
+    os.makedirs(plots_dir, exist_ok=True)
+    
+    json_path = os.path.join(plots_dir, f'{model_name}_training_metrics.json')
+    
+    # Prepare metrics data
+    metrics = {
+        'epochs': list(range(1, len(val_accuracies) + 1)),
+        'train_accuracy': logging_dict['train_accuracy_per_epoch'],
+        'val_accuracy': val_accuracies,
+        'test_accuracy': test_accuracy
+    }
+    
+    # Write to JSON
+    with open(json_path, 'w') as jsonfile:
+        json.dump(metrics, jsonfile, indent=2)
+    
+    print(f"Metrics saved to {json_path}")
 
 
 def accuracy(predictions, targets):
@@ -42,7 +74,7 @@ def accuracy(predictions, targets):
     
     Args:
       predictions: 2D float array of size [batch_size, n_classes], predictions of the model (logits)
-      llabels: 1D int array of size [batch_size]. Ground truth labels for
+      labels: 1D int array of size [batch_size]. Ground truth labels for
                each sample in the batch
     Returns:
       accuracy: scalar float, the accuracy of predictions,
@@ -90,7 +122,7 @@ def evaluate_model(model, data_loader):
       for batch in data_loader:
         x, y = batch
         x, y = x.to(model.device), y.to(model.device)
-        predictions = model(x.reshape(x.shape[0], -1))
+        predictions = model(x.view(x.shape[0], -1))
         avg_accuracy += accuracy(predictions, y)
     avg_accuracy /= len(data_loader)
     #######################
@@ -155,46 +187,52 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
     #######################
 
     # TODO: Initialize model and loss module
-    model = MLP(n_inputs=32*32*3, n_hidden=hidden_dims, n_classes=10, use_batch_norm=use_batch_norm)
+    size = torch.prod(torch.tensor(cifar10['train'].dataset[0][0].shape)).item()
+    model = MLP(n_inputs=size, n_hidden=hidden_dims, n_classes=10, use_batch_norm=use_batch_norm)
     model.to(device)  # Move model to device
     loss_module = nn.CrossEntropyLoss()
     # TODO: Test best model
     test_accuracy = 0
     best_model = None
+    best_val_accuracy = 0
     # TODO: Add any information you might want to save for plotting
     logging_dict = {'loss': [], 'train_accuracy': [], 'train_accuracy_per_epoch': [], 'val_accuracies': []}
     val_accuracies = []
     # TODO: Do optimization with the simple SGD optimizer
     optimizer = optim.SGD(model.parameters(), lr=lr)
-    optimizer.zero_grad()
     # TODO: Training loop including validation
     for epoch in range(epochs):
       model.train()
       epoch_train_acc = []
-      for batch in cifar10_loader['train']:
-        x, y = batch
-        predictions = model(x.to(device))
-        loss = loss_module(predictions, y.to(device))
+      for x, y in cifar10_loader['train']:
+        x, y = x.to(device), y.to(device)
+        x = x.view(x.shape[0], -1)
+        optimizer.zero_grad()
+        predictions = model(x)
+        loss = loss_module(predictions, y)
         
         loss.backward()
         optimizer.step()
-        optimizer.zero_grad()
-        batch_acc = accuracy(predictions, y.to(device))
+        batch_acc = accuracy(predictions, y)
         logging_dict['loss'].append(loss.item())
         logging_dict['train_accuracy'].append(batch_acc)
         epoch_train_acc.append(batch_acc)
       
-      # log average training accuracy for the epoch
-      logging_dict['train_accuracy_per_epoch'].append(np.mean(epoch_train_acc))
+      # log training accuracy for the epoch
+      logging_dict['train_accuracy_per_epoch'].append(evaluate_model(model, cifar10_loader['train']))
       
       val_accuracy = evaluate_model(model, cifar10_loader['validation'])
       val_accuracies.append(val_accuracy)
       logging_dict['val_accuracies'].append(val_accuracy)
-      tmp_test_accuracy = evaluate_model(model, cifar10_loader['test'])
-      if tmp_test_accuracy > test_accuracy:
-        test_accuracy = tmp_test_accuracy
+      if val_accuracy > best_val_accuracy:
+        best_val_accuracy = val_accuracy
         best_model = deepcopy(model)
-      print(f"Epoch {epoch+1}, Train Loss: {logging_dict['loss'][-1]}, Train Accuracy: {logging_dict['train_accuracy'][-1]}, Validation Accuracy: {val_accuracy}, Test Accuracy: {test_accuracy}")
+      
+      print(f"Epoch {epoch+1}, Train Loss: {logging_dict['loss'][-1]}, Train Accuracy: {logging_dict['train_accuracy'][-1]}, Validation Accuracy: {val_accuracy}")
+    
+    # Evaluate best model on test set ONLY ONCE at the end
+    test_accuracy = evaluate_model(best_model, cifar10_loader['test'])
+    print(f"Final Test Accuracy (best validation model): {test_accuracy}")
     
     #######################
     # END OF YOUR CODE    #
@@ -232,5 +270,16 @@ if __name__ == '__main__':
 
     model, val_accuracies, test_accuracy, logging_dict = train(**kwargs)
     
+    # Determine model name and output directory
+    if args.use_batch_norm:
+      model_name = 'pytorch_batch_norm'
+    else:
+      model_name = 'pytorch'
+    
+    plots_dir = 'plots'
+    
     # Save training plots to files
-    save_training_plots(logging_dict, val_accuracies, test_accuracy, model_name='pytorch')
+    save_training_plots(logging_dict, val_accuracies, test_accuracy, model_name=model_name, output_dir=plots_dir)
+    
+    # Save metrics to JSON in the same directory as plots
+    save_metrics_to_json(logging_dict, val_accuracies, test_accuracy, model_name=model_name, plots_dir=plots_dir)

@@ -1,0 +1,7 @@
+conv_type,net_type,mean_val_acc,std_val_acc,mean_test_acc,std_test_acc
+valid,Net2,100.0,0.0,0.0,0.0
+sconv,Net2,100.0,0.0,0.0,0.0
+fconv,Net2,100.0,0.0,0.0,0.0
+circular,Net2,100.0,0.0,0.0,0.0
+reflect,Net2,100.0,0.0,0.0,0.0
+replicate,Net2,100.0,0.0,0.0,0.0

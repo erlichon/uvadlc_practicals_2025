@@ -18,7 +18,7 @@ def get_config():
     config.lr = 1e-3
     config.weight_decay = 1e-5
 
-    config.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    config.device = 'cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu')
     config.progress_bar = True
     config.log_dir = './logs'
 

@@ -92,9 +92,10 @@ class LinearModule(object):
         #######################
         # ELU has similar variance to ReLU, so we use the same variance for the weight initialization.
         if input_layer:
-          # first layer doesn't have activation function, so we don't need to multiply by sqrt(2). We assume 
-          self.params['weight'] = np.random.randn(out_features, in_features) * np.sqrt(1 / out_features)
+          # first layer doesn't have activation function before it, so we don't need to multiply by sqrt(2). 
+          self.params['weight'] = np.random.randn(out_features, in_features) * np.sqrt(1 / in_features)
         else:
+          # Layers with activation before them 
           self.params['weight'] = np.random.randn(out_features, in_features) * np.sqrt(2 / in_features)
   
         self.params['bias'] = np.zeros(out_features)
@@ -314,7 +315,7 @@ class SoftMaxModule(object):
         #######################
         # according to the formula in the lecture notes
         if isinstance(self.cache['out'], np.ndarray):
-          dx = np.sum(dout[..., :, None] * (self.cache['out'][..., :, None] * (np.eye(self.cache['out'].shape[-1])[None, ...] - self.cache['out'][..., None, :])), axis=1)
+          dx = self.cache['out'] * (dout - np.sum(dout * self.cache['out'], axis=1, keepdims=True))
         else:
           raise ValueError("Cache is not set. Probably forward pass was not called prior to backward pass.")
         
@@ -365,7 +366,8 @@ class CrossEntropyModule(object):
         #######################
         # We use the cross entropy loss formula: L = -1/N * sum(y_i * log(p_i)). 
         # X is the output of the softmax layer, which is the probability of each class.
-        out = -np.sum(np.log(x[np.arange(len(y)), y])) / x.shape[0]
+        epsilon = 1e-10
+        out = -np.sum(np.log(x[np.arange(len(y)), y] + epsilon)) / x.shape[0]
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -389,10 +391,14 @@ class CrossEntropyModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        # according to the formula in the lecture notes
-        dx = np.zeros_like(x)  # Start with all zeros, shape (N, C)
-
-        dx[np.arange(len(y)), y] = -1 / (x[np.arange(len(y)), y] * x.shape[0])
+        # Gradient of -log(p_y) with respect to probabilities p
+        # dL/dp_j = -1/p_y if j=y (true class), 0 otherwise
+        # But since softmax backward will handle the full chain rule,
+        # we only need the gradient w.r.t. the probabilities themselves
+        dx = np.zeros_like(x)
+        epsilon = 1e-10
+        dx[np.arange(len(y)), y] = -1 / (x[np.arange(len(y)), y] + epsilon)
+        dx /= x.shape[0]  # Average over batch
         #######################
         # END OF YOUR CODE    #
         #######################
