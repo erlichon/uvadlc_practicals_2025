@@ -24,10 +24,16 @@ class MatrixGraphConvolution(nn.Module):
 
         Hint: A[i,j] -> there is an edge from node j to node i
         """
-        adjacency_matrix = torch.zeros(num_nodes, num_nodes, device=edge_index.device, dtype=edge_index.dtype)
+        # Use float dtype so it matches the feature matrix x
+        adjacency_matrix = torch.zeros(
+            num_nodes, num_nodes,
+            device=edge_index.device,
+            dtype=torch.float32,
+        )
         src, dst = edge_index
-        adjacency_matrix[src, dst] = 1.0
-        return adjacency_matrix.to(edge_index.device)
+        # A[i, j] = 1 if there is an edge j -> i (from src to dst)
+        adjacency_matrix[dst, src] = 1.0
+        return adjacency_matrix
 
     def make_inverted_degree_matrix(self, edge_index, num_nodes):
         """
@@ -160,7 +166,7 @@ class GraphAttention(nn.Module):
         
         
         # activations = ...
-        messages = Wh # Shape: [num_edges, num_out_features]
+        messages = Wh # Shape: [num_nodes, num_out_features]
         m_src = messages[sources] # Shape: [num_edges, num_out_features]
         m_dst = messages[destinations] # Shape: [num_edges, num_out_features]
 
@@ -180,6 +186,16 @@ class GraphAttention(nn.Module):
         aggregated_messages.index_add_(0, destinations, weighted_messages)
         # devide by softmax denominator
         aggregated_messages = aggregated_messages / softmax_denominator[:, None] # Shape: [num_nodes, num_out_features]
-        return aggregated_messages, {'edge_weights': edge_weights_numerator, 'softmax_weights': softmax_denominator,
-                                     'messages': messages}
+        
+        if not debug:
+            return aggregated_messages
+
+        # For tests: messages are the edge-level source activations m_src
+        # Shape expected: (#edges_with_loops, out_features) == (E + N, out_features)
+        messages_debug = m_src
+        return aggregated_messages, {
+            'edge_weights': edge_weights_numerator,  # [num_edges_with_loops]
+            'softmax_weights': softmax_denominator,  # [num_nodes]
+            'messages': messages_debug,              # [num_edges_with_loops, num_out_features]
+        }
 
