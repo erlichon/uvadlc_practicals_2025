@@ -6,6 +6,15 @@ from dataset import TextDataset, CharTokenizer
 from cfg import get_config
 from gpt import GPT
 
+
+def get_device() -> str:
+    """Return the best available device: CUDA, then MPS, then CPU."""
+    if torch.cuda.is_available():
+        return "cuda"
+    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
 class GPTLightningModule(pl.LightningModule):
 
     def __init__(self, config, model, dataset):
@@ -139,7 +148,8 @@ if __name__ == "__main__":
     model = GPTLightningModule(cfg, gpt_model, dataset)
     model.load_state_dict(state_dict['state_dict'])
 
-    device = next(model.parameters()).device
+    device = get_device()
+    model.to(device)
 
     generate(
         prompt=args.prompt,

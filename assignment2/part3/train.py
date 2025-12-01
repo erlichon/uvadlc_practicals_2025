@@ -2,6 +2,7 @@ import lightning
 from lightning import Trainer
 from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.loggers import TensorBoardLogger
+import torch
 
 from config import get_config
 from dataset import get_dataset, DataModule
@@ -9,9 +10,20 @@ from lightning_model import LightningModelWrapper
 from model import GraphNN
 
 
+def get_device() -> str:
+    """Return the best available device: CUDA, then MPS, then CPU."""
+    if torch.cuda.is_available():
+        return "cuda"
+    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+
 def train():
     dataset = get_dataset()
     config = get_config()
+    # Override device based on local hardware (CUDA -> MPS -> CPU)
+    config.device = get_device()
     lightning.seed_everything(config.seed)
 
     model = GraphNN(config, dataset)

@@ -20,6 +20,15 @@ from gpt import GPT
 from generate import generate, GPTLightningModule
 
 
+def get_device() -> str:
+    """Return the best available device: CUDA, then MPS, then CPU."""
+    if torch.cuda.is_available():
+        return "cuda"
+    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+
 def main():
     # Parse arguments
     args = get_config()
@@ -74,9 +83,10 @@ def main():
     dataset = TextDataset(args, args.txt_file, args.block_size, tokenizer)
     model = GPTLightningModule(cfg, gpt_model, dataset)
     model.load_state_dict(state_dict['state_dict'])
-    model.eval()
 
-    device = next(model.parameters()).device
+    device = get_device()
+    model.to(device)
+    model.eval()
     print(f"Running on device: {device}")
 
     # Load custom config or use defaults

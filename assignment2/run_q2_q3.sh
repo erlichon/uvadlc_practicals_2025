@@ -25,9 +25,9 @@ echo "====================================================================="
 
   # Command recommended in the assignment README:
   # uses cfg.py defaults (Grimm corpus), enables FlashAttention and compile.
-  python train.py \
+  srun $HOME/miniconda/envs/dl2025/bin/python train.py \
     --use_flash_attn \
-    --compile \
+    --compile
     --num_epochs 5 \
     --num_workers 8
 )
@@ -44,7 +44,7 @@ echo "====================================================================="
 
   # Uses default model_weights_folder and prompts/configurations from
   # evaluate_generation.py. Adjust arguments if you want a different run.
-  python evaluate_generation.py \
+  srun $HOME/miniconda/envs/dl2025/bin/python evaluate_generation.py \
     --model_weights_folder ./logs/gpt-mini/version_1/checkpoints \
     --output_file q2_8b_generation_results.json
 )
@@ -60,7 +60,7 @@ echo "====================================================================="
   cd part3 || exit 0
 
   # Uses its own config.py and logs train/val accuracies to TensorBoard.
-  python train.py
+  srun $HOME/miniconda/envs/dl2025/bin/python train.py
 )
 if [ $? -ne 0 ]; then
   echo "Q3.4d training FAILED."
