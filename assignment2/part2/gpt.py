@@ -92,7 +92,10 @@ class CausalSelfAttention(nn.Module):
 
         # Frequency for RoPE
         dim = config.n_embd // config.n_head
-        self.inv_freq = 1.0 / (10000 ** (torch.arange(0, dim, 2).float() / dim))
+        # instead of passing inv_freq to the device every time, we register it as a buffer. This is more efficient.
+        # self.inv_freq = 1.0 / (10000 ** (torch.arange(0, dim, 2).float() / dim))
+        self.register_buffer("inv_freq", 1.0 / (10000 ** (torch.arange(0, dim, 2).float() / dim)))
+        
 
         self.config  = config 
         self.debug = debug
@@ -110,19 +113,21 @@ class CausalSelfAttention(nn.Module):
             Tuple[torch.Tensor, torch.Tensor]: Tuple containing the modified query and key tensors.
         """
         # Generate RoPE embeddings dynamically based on T
-        seq_pos = torch.arange(0, T, dtype=torch.float32, device=xq.device)  # Shape: (T)
+        seq_pos = torch.arange(0, T, dtype=torch.float32, device=xq.device)  # Shape: (T), [0,1,....,T-1]
         freqs = torch.outer(seq_pos, self.inv_freq.to(xq.device))  # Shape: (T, dim // 2)
-        pos_emb = freqs.repeat_interleave(2, dim=-1)  # Shape: (T, dim)
+        pos_emb = freqs.repeat_interleave(2, dim=-1)[None, None, :, :]  # Shape: (1, 1, T, dim)
         
         
-         # Split pos into sin and cos components, repeating each to match xq and xk dimensions
-        pos_sin = pos_emb.sin()[None, None, :, :]
-        pos_cos = pos_emb.cos()[None, None, :, :]
+        # Split pos into sin and cos components, repeating each to match xq and xk dimensions
+        pos_sin = pos_emb.sin() # Shape: (1, 1, T, head_dim)
+        pos_cos = pos_emb.cos() # Shape: (1, 1, T, head_dim)
         # rotate half helper function
         def rotate_half(x):
             """Rotates half the hidden dims of the input."""
-            x1, x2 = x[..., ::2], x[..., 1::2]
-            return torch.stack([-x2, x1], dim=-1).flatten(-2) # Shape: (batch, num_heads, seq_len, head_dim)
+            result = torch.empty_like(x)
+            result[..., ::2] = -x[..., 1::2]
+            result[..., 1::2] = x[..., ::2]
+            return result
         # Apply RoPE transformation: pair and rotate dimensions
         # Rotate query and key tensors
         
@@ -153,9 +158,12 @@ class CausalSelfAttention(nn.Module):
         if self.use_flash_attn:
             # use flash attention. As stated in Q2.9, we can use the flash attention implementation from torch.nn.functional.
             att = None # not used in flash attention
+            # Apply dropout to the attention weights if the model is in training mode, otherwise, set the dropout probability to 0.0
+            dropout_p = self.attn_dropout.p if self.training else 0.0
+
             y = torch.nn.functional.scaled_dot_product_attention(q, k, v, 
                                                                  attn_mask=None, is_causal=True, # Built-in causal mask
-                                                                 dropout_p=self.attn_dropout.p)
+                                                                 dropout_p=dropout_p)
         else:
             # Compute attention scores
             att = q @ k.transpose(-2, -1) / math.sqrt(k.size(-1))
@@ -171,7 +179,7 @@ class CausalSelfAttention(nn.Module):
         y = y.transpose(1, 2).contiguous().view(B, T, C) # re-assemble all head outputs side by side
 
         # output projection
-        y = self.resid_dropout(self.c_proj(y))
+        y = self.c_proj(y)
         return y if not self.debug else {"att_probs": att, "q": q, "k": k, "v": v}
 
 
@@ -211,14 +219,15 @@ class TransformerDecoderBlock(nn.Module):
         self.resid_dropout = nn.Dropout(config.resid_pdrop)
         
     def forward(self, x):
-        # Forward pass through the Decoder Layer
-        out = self.layer_norm_1(x)
-        out = self.self_attention(out)
-        out = self.layer_norm_2(out)
-        out = self.mlpf(out)
-        # doing +x to add the residual connection
-        out = self.resid_dropout(out) + x
-        return out 
+        # Self-attention sub-layer with pre-norm and residual connection
+        attn_out = self.self_attention(self.layer_norm_1(x))
+        # explicitly stated in the assignment - "Typically applied after both the self-attention and feed-forward layers."
+        x = x + self.resid_dropout(attn_out)
+
+        # MLP sub-layer with pre-norm and residual connection
+        mlp_out = self.mlpf(self.layer_norm_2(x))
+        x = x + self.resid_dropout(mlp_out)
+        return x 
 
 
 class GPT(nn.Module):
