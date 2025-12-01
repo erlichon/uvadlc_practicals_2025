@@ -45,6 +45,7 @@ echo "====================================================================="
   # Uses default model_weights_folder and prompts/configurations from
   # evaluate_generation.py. Adjust arguments if you want a different run.
   python evaluate_generation.py \
+    --model_weights_folder ./logs/gpt-mini/version_1/checkpoints \
     --output_file q2_8b_generation_results.json
 )
 if [ $? -ne 0 ]; then
