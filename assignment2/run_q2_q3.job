@@ -30,18 +30,8 @@ cd "$HOME/uvadlc_practicals_2025" || exit 1
 
 echo "Current working directory: $(pwd)"
 
-# Ensure the Conda env from assignment2/part3/dl2025_gpu.yml exists.
-# This block is safe to run multiple times: it only creates the env if missing.
-if ! conda env list | awk '{print $1}' | grep -qx dl2025; then
-  echo "Conda env 'dl2025' not found. Creating it from assignment2/part3/dl2025_gpu.yml ..."
-  conda env create -f assignment2/part3/dl2025_gpu.yml || {
-    echo "Failed to create conda env 'dl2025' from dl2025_gpu.yml"
-    exit 1
-  }
-else
-  echo "Conda env 'dl2025' already exists. Using existing environment."
-fi
-
+# Activate the Conda environment defined by assignment2/part3/dl2025_gpu.yml.
+# We assume it has already been created (e.g. via `conda env create -f dl2025_gpu.yml`).
 source activate dl2025
 
 echo "Python version in env:"
