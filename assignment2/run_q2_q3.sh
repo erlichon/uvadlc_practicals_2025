@@ -18,9 +18,9 @@ set -u  # fail on undefined variables; do NOT use -e so later parts still run
 # Decide whether to wrap python calls in srun (for SLURM) or not (local)
 MODE="${1:-local}"   # default: local
 if [[ "${MODE}" == "slurm" ]]; then
-  PYTHON_RUNNER="srun python"
+  PYTHON_RUNNER="srun $HOME/miniconda3/envs/dl2025/bin/python"
 else
-  PYTHON_RUNNER="python"
+  PYTHON_RUNNER="$HOME/miniconda3/envs/dl2025/bin/python"
 fi
 
 # Always work relative to this script's directory (assignment2/)
