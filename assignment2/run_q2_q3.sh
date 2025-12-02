@@ -78,9 +78,14 @@ echo "Q3.4d: Train Graph CNN and Graph Attention (TensorBoard plots)"
 echo "====================================================================="
 (
   cd part3 || exit 0
-
-  # Uses its own config.py and logs train/val accuracies to TensorBoard.
-  ${PYTHON_RUNNER} train.py
+  # Train and log all three model variants as required in Q3.4:
+  #   - gcn          (message-passing GCN)
+  #   - matrix-gcn   (matrix-based GCN)
+  #   - gat          (graph attention)
+  for MODEL in gcn matrix-gcn gat; do
+    echo "---- Training GraphNN with --model ${MODEL} ----"
+    ${PYTHON_RUNNER} train.py --model "${MODEL}"
+  done
 )
 if [ $? -ne 0 ]; then
   echo "Q3.4d training FAILED."

@@ -156,8 +156,9 @@ def main():
             print(f"\n[{current_run}/{total_runs}] {config['name']}")
             
             try:
-                # Use the original generate function from generate.py
-                # num_samples=1 to get a single output per configuration
+                # Use the original generate function from generate.py.
+                # For num_samples=1, generate can either return a single string
+                # or a list/tuple of strings depending on implementation.
                 outputs = generate(
                     model=model,
                     model_type=cfg.model_type,
@@ -169,10 +170,15 @@ def main():
                     top_p=config['top_p'],
                     temperature=config['temperature'],
                     device=device,
-                    verbose=False  # We'll print ourselves
+                    verbose=False,  # We'll print ourselves
                 )
-                
-                output = outputs[0]  # Get the single sample
+
+                if isinstance(outputs, str):
+                    output = outputs
+                elif isinstance(outputs, (list, tuple)) and len(outputs) > 0:
+                    output = outputs[0]
+                else:
+                    raise RuntimeError(f"Unexpected output from generate(): {type(outputs)}")
                 
                 generation_result = {
                     "prompt": prompt,

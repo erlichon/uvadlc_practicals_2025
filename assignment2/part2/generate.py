@@ -87,6 +87,7 @@ def generate(
             print('-'*80)
             print(out)
 
+    return decoded_outputs
 
 
 if __name__ == "__main__":
