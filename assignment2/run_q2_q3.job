@@ -13,7 +13,7 @@
 #   cd $HOME/uvadlc_practicals_2025
 #   sbatch assignment2/run_q2_q3.job
 
-#SBATCH --partition=gpu_mig
+#SBATCH --partition=gpu_a100
 #SBATCH --gpus=1
 #SBATCH --job-name=DL1_A2_Q2_Q3
 #SBATCH --ntasks=1
@@ -51,6 +51,6 @@ echo "==============================================================="
 echo "Running run_q2_q3.sh (Q2.7, Q2.8b, Q3.4d)"
 echo "==============================================================="
 
-srun bash assignment2/run_q2_q3.sh
+bash assignment2/run_q2_q3.sh slurm
 
 

@@ -7,11 +7,21 @@
 # This script is designed to be called from anywhere; it will cd into the
 # assignment2 directory where it lives and then run the appropriate commands.
 #
-# Example SLURM usage (from your home directory):
-#   cd $HOME/uvadlc_practicals_2025
-#   sbatch your_slurm_job_that_calls:  bash assignment2/run_q2_q3.sh
+# Usage:
+#   Local (e.g., on your Mac with MPS):
+#       bash assignment2/run_q2_q3.sh
+#   On SLURM (inside a job, using srun):
+#       bash assignment2/run_q2_q3.sh slurm
 
 set -u  # fail on undefined variables; do NOT use -e so later parts still run
+
+# Decide whether to wrap python calls in srun (for SLURM) or not (local)
+MODE="${1:-local}"   # default: local
+if [[ "${MODE}" == "slurm" ]]; then
+  PYTHON_RUNNER="srun python"
+else
+  PYTHON_RUNNER="python"
+fi
 
 # Always work relative to this script's directory (assignment2/)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -25,7 +35,7 @@ echo "====================================================================="
 
   # Command recommended in the assignment README:
   # uses cfg.py defaults (Grimm corpus), enables FlashAttention and compile.
-  srun $HOME/miniconda/envs/dl2025/bin/python train.py --use_flash_attn --compile --num_epochs 5 --num_workers 8
+  ${PYTHON_RUNNER} train.py --use_flash_attn --compile --num_epochs 5 --num_workers 8
 )
 if [ $? -ne 0 ]; then
   echo "Q2.7 training FAILED (continuing to Q2.8b)..."
@@ -38,9 +48,25 @@ echo "====================================================================="
 (
   cd part2 || exit 0
 
+  # Determine latest version_* folder under logs/gpt-mini for model weights
+  LATEST_CHECKPOINT_DIR=""
+  if [ -d "./logs/gpt-mini" ]; then
+    LATEST_CHECKPOINT_DIR=$(ls -d ./logs/gpt-mini/version_* 2>/dev/null | sort -V | tail -n 1)
+  fi
+
+  if [ -z "${LATEST_CHECKPOINT_DIR}" ]; then
+    echo "No checkpoint directory ./logs/gpt-mini/version_* found; skipping Q2.8b."
+    exit 0
+  fi
+
+  LATEST_CHECKPOINT_DIR="${LATEST_CHECKPOINT_DIR}/checkpoints"
+  echo "Using checkpoints from: ${LATEST_CHECKPOINT_DIR}"
+
   # Uses default model_weights_folder and prompts/configurations from
   # evaluate_generation.py. Adjust arguments if you want a different run.
-  srun $HOME/miniconda/envs/dl2025/bin/python evaluate_generation.py --model_weights_folder ./logs/gpt-mini/version_1/checkpoints --output_file q2_8b_generation_results.json
+  ${PYTHON_RUNNER} evaluate_generation.py \
+    --model_weights_folder "${LATEST_CHECKPOINT_DIR}" \
+    --output_file q2_8b_generation_results.json
 )
 if [ $? -ne 0 ]; then
   echo "Q2.8b evaluation FAILED (continuing to Q3.4d)..."
@@ -54,7 +80,7 @@ echo "====================================================================="
   cd part3 || exit 0
 
   # Uses its own config.py and logs train/val accuracies to TensorBoard.
-  srun $HOME/miniconda/envs/dl2025/bin/python train.py
+  ${PYTHON_RUNNER} train.py
 )
 if [ $? -ne 0 ]; then
   echo "Q3.4d training FAILED."
