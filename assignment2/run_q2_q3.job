@@ -25,6 +25,7 @@ module purge
 module load 2025
 module load Anaconda3/2025.06-1
 
+# Go to the repository root (adjust if your repo is elsewhere)
 cd "$HOME/uvadlc_practicals_2025" || exit 1
 
 # Activate the dl2025 environment (created from dl2025_gpu.yml)
@@ -38,4 +39,5 @@ echo "Running run_q2_q3.sh (Q2.7, Q2.8b, Q3.4d)"
 echo "==============================================================="
 
 bash assignment2/run_q2_q3.sh slurm
+
 
