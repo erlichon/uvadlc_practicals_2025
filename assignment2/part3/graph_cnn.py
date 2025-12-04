@@ -68,7 +68,7 @@ class MatrixGraphConvolution(nn.Module):
         out = D_inv @ A @ x @ self.W.T + x @ self.B.T
         return out
 
-class MessageGraphConvolution(nn.Module):
+class MessageGraphConvolution(nn.Module):     
     def __init__(self, in_features, out_features):
         super(MessageGraphConvolution, self).__init__()
         self.W = nn.Parameter(torch.Tensor(out_features, in_features))
@@ -105,7 +105,7 @@ class MessageGraphConvolution(nn.Module):
         sum_weight = sum_weight.masked_fill(sum_weight == 0, 1.0)
         
         # mean aggregation as defined in equation 6
-        aggregated_messages = aggregated_messages / sum_weight.unsqueeze(1)
+        aggregated_messages = aggregated_messages / sum_weight[:, None]
         
         return aggregated_messages
 
