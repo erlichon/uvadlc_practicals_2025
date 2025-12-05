@@ -105,12 +105,19 @@ def main():
             # Greedy
             {"name": "Greedy", "do_sample": False, "top_k": None, "top_p": None, "temperature": 1.0},
             
-            # Top-p with varying temperature
-            {"name": "Top-p (T=0.5, p=0.6)", "do_sample": True, "top_k": None, "top_p": 0.6, "temperature": 0.5},
-            {"name": "Top-p (T=0.8, p=0.6)", "do_sample": True, "top_k": None, "top_p": 0.6, "temperature": 0.8},
+            # Top-p varying p at T=1.0 (full range)
+            {"name": "Top-p (T=1.0, p=0.4)", "do_sample": True, "top_k": None, "top_p": 0.4, "temperature": 1.0},
+            {"name": "Top-p (T=1.0, p=0.5)", "do_sample": True, "top_k": None, "top_p": 0.5, "temperature": 1.0},
             {"name": "Top-p (T=1.0, p=0.6)", "do_sample": True, "top_k": None, "top_p": 0.6, "temperature": 1.0},
+            {"name": "Top-p (T=1.0, p=0.8)", "do_sample": True, "top_k": None, "top_p": 0.8, "temperature": 1.0},
             {"name": "Top-p (T=1.0, p=0.9)", "do_sample": True, "top_k": None, "top_p": 0.9, "temperature": 1.0},
-            {"name": "Top-p (T=1.5, p=0.9)", "do_sample": True, "top_k": None, "top_p": 0.9, "temperature": 1.5},
+            {"name": "Top-p (T=1.0, p=0.95)", "do_sample": True, "top_k": None, "top_p": 0.95, "temperature": 1.0},
+            
+            # Top-p with p=0.85 - varying temperature
+            {"name": "Top-p (T=0.5, p=0.85)", "do_sample": True, "top_k": None, "top_p": 0.85, "temperature": 0.5},
+            {"name": "Top-p (T=0.8, p=0.85)", "do_sample": True, "top_k": None, "top_p": 0.85, "temperature": 0.8},
+            {"name": "Top-p (T=1.0, p=0.85)", "do_sample": True, "top_k": None, "top_p": 0.85, "temperature": 1.0},
+            {"name": "Top-p (T=1.5, p=0.85)", "do_sample": True, "top_k": None, "top_p": 0.85, "temperature": 1.5},
             
             # Top-k with varying k
             {"name": "Top-k (T=1.0, k=5)", "do_sample": True, "top_k": 5, "top_p": None, "temperature": 1.0},
