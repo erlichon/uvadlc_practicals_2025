@@ -485,9 +485,17 @@ class GPT(nn.Module):
                                 tokens, with shape (batch size, sequence length + max_new_tokens).
         """
         assert not (top_k and top_p), "You can only use one of top_k or top_p sampling"
-        for _ in range(max_new_tokens):
+        # pre-allocate the output tensor to avoid reallocations
+        B, initial_len = idx.size()
+        output = torch.empty(B, initial_len + max_new_tokens, dtype=idx.dtype, device=idx.device)
+        output[:, :initial_len] = idx
+        
+        for i in range(max_new_tokens):
+            seq_len = initial_len + i
             # if the sequence context is growing too long we must crop it at block_size
-            idx_cond = idx if idx.size(1) <= self.block_size else idx[:, -self.block_size:]
+            # using output instead of idx since we used pre-allocation
+            # idx_cond = idx if idx.size(1) <= self.block_size else idx[:, -self.block_size:]
+            idx_cond = output[:, :seq_len] if seq_len <= self.block_size else output[:, seq_len - self.block_size:seq_len]
 
             # forward the model to get the logits for the index in the sequence
             # pluck the logits at the final step and scale by desired temperature
@@ -499,28 +507,6 @@ class GPT(nn.Module):
             else:
                 # apply softmax to convert logits to (normalized) probabilities
                 logits = self.forward(idx_cond)[:, -1, :] / temperature
-                
-                # optionally only consider top-k logits for sampling. 
-                # if top_k is not None:
-                #     topk_values, topk_indices = torch.topk(logits, min(top_k, logits.size(-1)), dim=-1)
-                #     logits_filtered = torch.full_like(logits, float('-inf'))
-                #     logits_filtered.scatter_(dim=-1, index=topk_indices, src=topk_values)
-
-                # # optionally apply top-p sampling
-                # if top_p is not None:
-                #     logits, sorted_indices = logits.sort(dim=-1, descending=True)
-                #     logits_cumsum = logits.cumsum(dim=-1)
-                #     remove_indices = logits_cumsum > top_p
-                #     remove_indices[..., 0] = False
-                    
-                #     # Scatter back to original indexing
-                #     indices_to_remove = remove_indices.scatter(
-                #         -1, sorted_indices, remove_indices
-                #     )
-                #     logits_filtered = logits.masked_fill(indices_to_remove, float('-inf'))                        
-                
-                # probs = F.softmax(logits_filtered, dim=-1)
-                # idx_next = torch.multinomial(probs, num_samples=1)
     
                 if top_k is not None:
                     topk_values, topk_indices = torch.topk(logits, min(top_k, logits.size(-1)), dim=-1)
@@ -529,17 +515,25 @@ class GPT(nn.Module):
                 
                 if top_p is not None:
                     sorted_logits, sorted_indices = logits.sort(dim=-1, descending=True)
-                    cumsum_probs = F.softmax(sorted_logits, dim=-1).cumsum(dim=-1)
-                    remove_indices = cumsum_probs > top_p
-                    remove_indices[..., 0] = False
+                    sorted_probs = F.softmax(sorted_logits, dim=-1)
+                    cumsum_probs = sorted_probs.cumsum(dim=-1)
                     
-                    indices_to_remove = remove_indices.scatter(-1, sorted_indices, remove_indices)
+                    # Shift cumsum to get cumsum BEFORE including each token
+                    # [0.5, 0.8, 0.95, 1.0] -> [0, 0.5, 0.8, 0.95]
+                    cumsum_before = F.pad(cumsum_probs[..., :-1], (1, 0), value=0.0)
+                    
+                    # Remove tokens where cumsum BEFORE this token already exceeds threshold
+                    remove_indices = cumsum_before > top_p
+                    
+                    indices_to_remove = torch.empty_like(remove_indices)
+                    indices_to_remove.scatter_(-1, sorted_indices, remove_indices)
                     logits = logits.masked_fill(indices_to_remove, float('-inf'))
                 
                 probs = F.softmax(logits, dim=-1)
                 idx_next = torch.multinomial(probs, num_samples=1)
             
             # append sampled index to the running sequence and continue
-            idx = torch.cat((idx, idx_next), dim=1)
+            output[:, seq_len] = idx_next.squeeze(-1)
 
-        return idx
+        # output instead of idx, since we need to return the entire sequence and we used pre-allocation
+        return output
