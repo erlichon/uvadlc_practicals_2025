@@ -1,0 +1,948 @@
+{
+  "metadata": {
+    "model_weights_folder": "./logs/gpt-mini/version_3/checkpoints",
+    "num_generated_tokens": 100,
+    "seed": 0
+  },
+  "prompts": [
+    "Once upon a time",
+    "The king said to",
+    "In the dark forest",
+    "And they lived happily",
+    "The old woman gave"
+  ],
+  "configurations": [
+    {
+      "name": "Greedy",
+      "do_sample": false,
+      "top_k": null,
+      "top_p": null,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-p (T=1.0, p=0.4)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.4,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-p (T=1.0, p=0.5)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.5,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-p (T=1.0, p=0.6)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.6,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-p (T=1.0, p=0.8)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.8,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-p (T=1.0, p=0.9)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.9,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-p (T=1.0, p=0.95)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.95,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-p (T=0.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.5
+    },
+    {
+      "name": "Top-p (T=0.8, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.8
+    },
+    {
+      "name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-p (T=1.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.5
+    },
+    {
+      "name": "Top-k (T=1.0, k=5)",
+      "do_sample": true,
+      "top_k": 5,
+      "top_p": null,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-k (T=1.0, k=20)",
+      "do_sample": true,
+      "top_k": 20,
+      "top_p": null,
+      "temperature": 1.0
+    },
+    {
+      "name": "Top-k (T=1.0, k=50)",
+      "do_sample": true,
+      "top_k": 50,
+      "top_p": null,
+      "temperature": 1.0
+    }
+  ],
+  "generations": [
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Greedy",
+      "do_sample": false,
+      "top_k": null,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "Once upon a time a short time, and the soldier was still more\nviolent stood before him, and the soldier was still st",
+      "generated_only": " a short time, and the soldier was still more\nviolent stood before him, and the soldier was still st",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=1.0, p=0.4)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.4,
+      "temperature": 1.0,
+      "full_output": "Once upon a time a rope where the two children were gone. Then the\nking was asked to do so, and when he had found th",
+      "generated_only": " a rope where the two children were gone. Then the\nking was asked to do so, and when he had found th",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=1.0, p=0.5)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.5,
+      "temperature": 1.0,
+      "full_output": "Once upon a time a little tailor and the little girl remained the\nbest of the forest. The king was very angry, and s",
+      "generated_only": " a little tailor and the little girl remained the\nbest of the forest. The king was very angry, and s",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=1.0, p=0.6)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.6,
+      "temperature": 1.0,
+      "full_output": "Once upon a time a rich particular to the truth part of the\nProject Gutenberg-tm License and Project Gutenberg-tm Li",
+      "generated_only": " a rich particular to the truth part of the\nProject Gutenberg-tm License and Project Gutenberg-tm Li",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=1.0, p=0.8)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.8,
+      "temperature": 1.0,
+      "full_output": "Once upon a time all who was mistress for the bird sits by\nthe great deal from more.’ And as the horse had the son h",
+      "generated_only": " all who was mistress for the bird sits by\nthe great deal from more.’ And as the horse had the son h",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0,
+      "full_output": "Once upon a time a distance they were all requirements of\npeas.’ Then she put his paws from afar it belonged to weep",
+      "generated_only": " a distance they were all requirements of\npeas.’ Then she put his paws from afar it belonged to weep",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=1.0, p=0.9)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.9,
+      "temperature": 1.0,
+      "full_output": "Once upon a time for them, and the dog said to the\ncastle, ‘I will give thee the king of a tree to follow a little m",
+      "generated_only": " for them, and the dog said to the\ncastle, ‘I will give thee the king of a tree to follow a little m",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=1.0, p=0.95)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.95,
+      "temperature": 1.0,
+      "full_output": "Once upon a time it was to\nshudder. He took him to the castle in the mouse, and he felt his\ndaughter. But her heart ",
+      "generated_only": " it was to\nshudder. He took him to the castle in the mouse, and he felt his\ndaughter. But her heart ",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=0.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.5,
+      "full_output": "Once upon a time a rope who was always still more hay!’ Then he took\nhim and said: ‘The dogs says for a long time, a",
+      "generated_only": " a rope who was always still more hay!’ Then he took\nhim and said: ‘The dogs says for a long time, a",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=0.8, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.8,
+      "full_output": "Once upon a time he would not see him as he was gone, and\nthat he was forced to do what he had fallen asleep. So she",
+      "generated_only": " he would not see him as he was gone, and\nthat he was forced to do what he had fallen asleep. So she",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0,
+      "full_output": "Once upon a time he went into the wood, and said: ‘If you\ncould have given me a river, and I have brought you the dr",
+      "generated_only": " he went into the wood, and said: ‘If you\ncould have given me a river, and I have brought you the dr",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-p (T=1.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.5,
+      "full_output": "Once upon a time a\ndrive a wealth, and as fast as that a long tail in the sun.\n\nNow long afterwards that over his ca",
+      "generated_only": " a\ndrive a wealth, and as fast as that a long tail in the sun.\n\nNow long afterwards that over his ca",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-k (T=1.0, k=5)",
+      "do_sample": true,
+      "top_k": 5,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "Once upon a time there was a suitors\nare, for that she would take having his last stones up she had no longer\nseen. ",
+      "generated_only": " there was a suitors\nare, for that she would take having his last stones up she had no longer\nseen. ",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-k (T=1.0, k=20)",
+      "do_sample": true,
+      "top_k": 20,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "Once upon a time a poor shepherd’s cat, and he\nfelt pig the monster had finished it. His shoulder presently here to ",
+      "generated_only": " a poor shepherd’s cat, and he\nfelt pig the monster had finished it. His shoulder presently here to ",
+      "error": null
+    },
+    {
+      "prompt": "Once upon a time",
+      "config_name": "Top-k (T=1.0, k=50)",
+      "do_sample": true,
+      "top_k": 50,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "Once upon a time after their hat\nbeautiful fellow, where they did not be easy years, we must first coming\ntowards, y",
+      "generated_only": " after their hat\nbeautiful fellow, where they did not be easy years, we must first coming\ntowards, y",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Greedy",
+      "do_sample": false,
+      "top_k": null,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "The king said to him: ‘What a clever Elsie we have!’ and said, ‘I will\ngive you a cake and a company with me.’ The m",
+      "generated_only": " him: ‘What a clever Elsie we have!’ and said, ‘I will\ngive you a cake and a company with me.’ The m",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=1.0, p=0.4)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.4,
+      "temperature": 1.0,
+      "full_output": "The king said to him: ‘What a fine thing to see me so fast?’ ‘I am\nnot stand upon your head.’ ‘I am sure I was going",
+      "generated_only": " him: ‘What a fine thing to see me so fast?’ ‘I am\nnot stand upon your head.’ ‘I am sure I was going",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=1.0, p=0.5)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.5,
+      "temperature": 1.0,
+      "full_output": "The king said to him: ‘If you will not do it, and shall be\nable to the tree and see where I shall be burnt to find t",
+      "generated_only": " him: ‘If you will not do it, and shall be\nable to the tree and see where I shall be burnt to find t",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=1.0, p=0.6)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.6,
+      "temperature": 1.0,
+      "full_output": "The king said to him: ‘What are you\ndoing there? I will try and sing to have a little window.’ The peasant said:\n‘Wh",
+      "generated_only": " him: ‘What are you\ndoing there? I will try and sing to have a little window.’ The peasant said:\n‘Wh",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=1.0, p=0.8)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.8,
+      "temperature": 1.0,
+      "full_output": "The king said to him: ‘Do not your life, I cannot do it.’\n\nThen he gave him a box on the room, and said: ‘Dear fathe",
+      "generated_only": " him: ‘Do not your life, I cannot do it.’\n\nThen he gave him a box on the room, and said: ‘Dear fathe",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0,
+      "full_output": "The king said to him, ‘This will not do it for your servant, and let me\ngo in the room of my pretty children.’ So th",
+      "generated_only": " him, ‘This will not do it for your servant, and let me\ngo in the room of my pretty children.’ So th",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=1.0, p=0.9)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.9,
+      "temperature": 1.0,
+      "full_output": "The king said to the gate of the king’s son; ‘and I will give you\nno more for you to me.’ ‘You must go away,’ answer",
+      "generated_only": " the gate of the king’s son; ‘and I will give you\nno more for you to me.’ ‘You must go away,’ answer",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=1.0, p=0.95)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.95,
+      "temperature": 1.0,
+      "full_output": "The king said to him: ‘What is the countryman to\nwhat we must be found?’ ‘Do you sleep upon my father’s house,’ said",
+      "generated_only": " him: ‘What is the countryman to\nwhat we must be found?’ ‘Do you sleep upon my father’s house,’ said",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=0.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.5,
+      "full_output": "The king said to him: ‘If the wild beasts of the cook, and I shall be\nable to find the castle where I am a poor shoe",
+      "generated_only": " him: ‘If the wild beasts of the cook, and I shall be\nable to find the castle where I am a poor shoe",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=0.8, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.8,
+      "full_output": "The king said to him: ‘The wild man, the people was very fast asleep,\nand said, ‘Sit with me, and I will shudder.’ S",
+      "generated_only": " him: ‘The wild man, the people was very fast asleep,\nand said, ‘Sit with me, and I will shudder.’ S",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0,
+      "full_output": "The king said to him, ‘Goodbye, do that the good forest.’ ‘Good\nevening, Hans. Where have you been?’ ‘Ah, Hans?’ ‘To",
+      "generated_only": " him, ‘Goodbye, do that the good forest.’ ‘Good\nevening, Hans. Where have you been?’ ‘Ah, Hans?’ ‘To",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-p (T=1.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.5,
+      "full_output": "The king said to him, ‘You live, and as no clothes\nsurcourse let us nobody, and I will see if he wants to get off an",
+      "generated_only": " him, ‘You live, and as no clothes\nsurcourse let us nobody, and I will see if he wants to get off an",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-k (T=1.0, k=5)",
+      "do_sample": true,
+      "top_k": 5,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "The king said to him: ‘You may give me some carriage and drink at my wife.’\n\nThe girl rejoicing together too her gra",
+      "generated_only": " him: ‘You may give me some carriage and drink at my wife.’\n\nThe girl rejoicing together too her gra",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-k (T=1.0, k=20)",
+      "do_sample": true,
+      "top_k": 20,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "The king said to the follower. ‘I will field give me them me\nto deceive me, and give me the second faithful Project ",
+      "generated_only": " the follower. ‘I will field give me them me\nto deceive me, and give me the second faithful Project ",
+      "error": null
+    },
+    {
+      "prompt": "The king said to",
+      "config_name": "Top-k (T=1.0, k=50)",
+      "do_sample": true,
+      "top_k": 50,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "The king said to him: ‘Hus hAh! Put with me and say?’ ‘That the\nfurther has golden ring on my goods?’ ‘The following",
+      "generated_only": " him: ‘Hus hAh! Put with me and say?’ ‘That the\nfurther has golden ring on my goods?’ ‘The following",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Greedy",
+      "do_sample": false,
+      "top_k": null,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "In the dark forest, and the mother said: ‘If you will not do it, and\nwhen I am going to see you for my father’s house.",
+      "generated_only": ", and the mother said: ‘If you will not do it, and\nwhen I am going to see you for my father’s house.",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=1.0, p=0.4)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.4,
+      "temperature": 1.0,
+      "full_output": "In the dark forest, and when I asked him he had given him a great\ndeal of gold and see what it is to be done.’ Then th",
+      "generated_only": ", and when I asked him he had given him a great\ndeal of gold and see what it is to be done.’ Then th",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=1.0, p=0.5)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.5,
+      "temperature": 1.0,
+      "full_output": "In the dark forest, and when they had finished the wolf said, ‘What\nare you see you going?’ ‘I don’t know where you ar",
+      "generated_only": ", and when they had finished the wolf said, ‘What\nare you see you going?’ ‘I don’t know where you ar",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=1.0, p=0.6)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.6,
+      "temperature": 1.0,
+      "full_output": "In the dark forest, the fox said, ‘You must like to die.’ The king replied: ‘Yes,\nI will give you a piece of bread to ",
+      "generated_only": ", the fox said, ‘You must like to die.’ The king replied: ‘Yes,\nI will give you a piece of bread to ",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.8,
+      "temperature": 1.0,
+      "full_output": "In the dark forest.’ At last he took her by the sun, and went to\nsleep and awoke and ate it, and he cried:\n\n ‘Blow, br",
+      "generated_only": ".’ At last he took her by the sun, and went to\nsleep and awoke and ate it, and he cried:\n\n ‘Blow, br",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0,
+      "full_output": "In the dark forest should be like to rest a\nfire; and I will run and asked for you to drink the boy, and at the good\nt",
+      "generated_only": " should be like to rest a\nfire; and I will run and asked for you to drink the boy, and at the good\nt",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=1.0, p=0.9)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.9,
+      "temperature": 1.0,
+      "full_output": "In the dark forest, and the dwarfs knew him through the\nclothes, and that all sitting on the wall, if the sun fell on ",
+      "generated_only": ", and the dwarfs knew him through the\nclothes, and that all sitting on the wall, if the sun fell on ",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=1.0, p=0.95)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.95,
+      "temperature": 1.0,
+      "full_output": "In the dark forest, they set a very sorrowful; for\nthe children find the pig flower and feet. When any more haste down",
+      "generated_only": ", they set a very sorrowful; for\nthe children find the pig flower and feet. When any more haste down",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=0.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.5,
+      "full_output": "In the dark forest, and the giant let him to go into the garden, and\nsaid: ‘The king’s daughter said, ‘I have stolen t",
+      "generated_only": ", and the giant let him to go into the garden, and\nsaid: ‘The king’s daughter said, ‘I have stolen t",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=0.8, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.8,
+      "full_output": "In the dark forest, seven little sister and see it, but when I asked\nthe white doves which had fallen asleep, he said ",
+      "generated_only": ", seven little sister and see it, but when I asked\nthe white doves which had fallen asleep, he said ",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0,
+      "full_output": "In the dark forest, and driven him a rich man had made\ninto the forest with the apple. He went to his wife were to set",
+      "generated_only": ", and driven him a rich man had made\ninto the forest with the apple. He went to his wife were to set",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-p (T=1.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.5,
+      "full_output": "In the dark forest.’\n\nHe told him that not one side and hated time, they herself at the\npoor maiden.\n\nNow the dwarf wa",
+      "generated_only": ".’\n\nHe told him that not one side and hated time, they herself at the\npoor maiden.\n\nNow the dwarf wa",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-k (T=1.0, k=5)",
+      "do_sample": true,
+      "top_k": 5,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "In the dark forest.’ He led her husband in it was gone, and\nshe heard the thicket flew away with the same time, and sa",
+      "generated_only": ".’ He led her husband in it was gone, and\nshe heard the thicket flew away with the same time, and sa",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-k (T=1.0, k=20)",
+      "do_sample": true,
+      "top_k": 20,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "In the dark forest, but we might say how to do my bird’s\nhead so gold, all beready diamonds, which was left to her del",
+      "generated_only": ", but we might say how to do my bird’s\nhead so gold, all beready diamonds, which was left to her del",
+      "error": null
+    },
+    {
+      "prompt": "In the dark forest",
+      "config_name": "Top-k (T=1.0, k=50)",
+      "do_sample": true,
+      "top_k": 50,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "In the dark forest, but\nit will have a flock as far as if he were still walked; and only to\nthink that was so much win",
+      "generated_only": ", but\nit will have a flock as far as if he were still walked; and only to\nthink that was so much win",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Greedy",
+      "do_sample": false,
+      "top_k": null,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "And they lived happily together very happy and said: ‘If you will not\nbe able to find the way off, I will give you the chi",
+      "generated_only": " together very happy and said: ‘If you will not\nbe able to find the way off, I will give you the chi",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=1.0, p=0.4)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.4,
+      "temperature": 1.0,
+      "full_output": "And they lived happily together very sorrowful form and have\nthe spinning-wheels. Then the wolf was set to the king’s daug",
+      "generated_only": " together very sorrowful form and have\nthe spinning-wheels. Then the wolf was set to the king’s daug",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=1.0, p=0.5)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.5,
+      "temperature": 1.0,
+      "full_output": "And they lived happily together very happy, and then went to the\nspinning-wheels, and said, ‘The old woman, who has been s",
+      "generated_only": " together very happy, and then went to the\nspinning-wheels, and said, ‘The old woman, who has been s",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=1.0, p=0.6)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.6,
+      "temperature": 1.0,
+      "full_output": "And they lived happily together very happy, and she did\nnot to see the water in the world. And the king said, ‘I will give",
+      "generated_only": " together very happy, and she did\nnot to see the water in the world. And the king said, ‘I will give",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=1.0, p=0.8)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.8,
+      "temperature": 1.0,
+      "full_output": "And they lived happily together and sprinkled at the door, and said:\n‘When you can cannot take the stream of the house-doo",
+      "generated_only": " together and sprinkled at the door, and said:\n‘When you can cannot take the stream of the house-doo",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0,
+      "full_output": "And they lived happily together a single\nway; and after that they will let you about the master.’ And afterwards\nthe old w",
+      "generated_only": " together a single\nway; and after that they will let you about the master.’ And afterwards\nthe old w",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=1.0, p=0.9)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.9,
+      "temperature": 1.0,
+      "full_output": "And they lived happily together, and ate them to step the\nashes, and the bird stood before him, and said: ‘This time you t",
+      "generated_only": " together, and ate them to step the\nashes, and the bird stood before him, and said: ‘This time you t",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=1.0, p=0.95)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.95,
+      "temperature": 1.0,
+      "full_output": "And they lived happily together a long\ntall of gold, for I want to lie the others stretched by the white cloth,\nshe might ",
+      "generated_only": " together a long\ntall of gold, for I want to lie the others stretched by the white cloth,\nshe might ",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=0.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.5,
+      "full_output": "And they lived happily together into the wood to look for\nthe tree and drink, and went to the garden and said: ‘I have see",
+      "generated_only": " together into the wood to look for\nthe tree and drink, and went to the garden and said: ‘I have see",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=0.8, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.8,
+      "full_output": "And they lived happily together very\nheavy that the house they were all sitting upon the thicket were sitting\nfrom the bed",
+      "generated_only": " together very\nheavy that the house they were all sitting upon the thicket were sitting\nfrom the bed",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0,
+      "full_output": "And they lived happily together in the\npot of water. The king told him all the good ring, and he said to her,\n‘Alas, alas!",
+      "generated_only": " together in the\npot of water. The king told him all the good ring, and he said to her,\n‘Alas, alas!",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-p (T=1.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.5,
+      "full_output": "And they lived happily on him, for they found the great bottom of its\nevening. As the miser grieved the peasant still hold",
+      "generated_only": " on him, for they found the great bottom of its\nevening. As the miser grieved the peasant still hold",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-k (T=1.0, k=5)",
+      "do_sample": true,
+      "top_k": 5,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "And they lived happily the people was loved at her, and\nset her on the shoe is, and threw it all the goose and drinking wh",
+      "generated_only": " the people was loved at her, and\nset her on the shoe is, and threw it all the goose and drinking wh",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-k (T=1.0, k=20)",
+      "do_sample": true,
+      "top_k": 20,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "And they lived happily he standing\nand held them about, and slept like a large glass asleep. The sweetheart\nscarcely had a",
+      "generated_only": " he standing\nand held them about, and slept like a large glass asleep. The sweetheart\nscarcely had a",
+      "error": null
+    },
+    {
+      "prompt": "And they lived happily",
+      "config_name": "Top-k (T=1.0, k=50)",
+      "do_sample": true,
+      "top_k": 50,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "And they lived happily together very happy,\n ‘Heads and played abouts the truth waiting-maid,\n  Straw its cruelty fly!\n  I",
+      "generated_only": " together very happy,\n ‘Heads and played abouts the truth waiting-maid,\n  Straw its cruelty fly!\n  I",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Greedy",
+      "do_sample": false,
+      "top_k": null,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him a beautiful child, and the soldier was still more\ndish. Then the king said, ‘What a clever Elsi",
+      "generated_only": " him a beautiful child, and the soldier was still more\ndish. Then the king said, ‘What a clever Elsi",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=1.0, p=0.4)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.4,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him a little old king, and the cook was always\nburnt into the forest, and the princess was so beaut",
+      "generated_only": " him a little old king, and the cook was always\nburnt into the forest, and the princess was so beaut",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=1.0, p=0.5)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.5,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him the stone, and said: ‘If you will not see the\nfire and drink away your life.’ Then the prince t",
+      "generated_only": " him the stone, and said: ‘If you will not see the\nfire and drink away your life.’ Then the prince t",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=1.0, p=0.6)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.6,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him the king’s son, and the man went out together\nto him, and said: ‘What a little while he has bee",
+      "generated_only": " him the king’s son, and the man went out together\nto him, and said: ‘What a little while he has bee",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=1.0, p=0.8)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.8,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him the princess alone that all was going to the\nchildren.\n\nSo he went out to the terms of this way",
+      "generated_only": " him the princess alone that all was going to the\nchildren.\n\nSo he went out to the terms of this way",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him his father should be\nput out in his hand to draw the day. Then the wolf made him very heart to\n",
+      "generated_only": " him his father should be\nput out in his hand to draw the day. Then the wolf made him very heart to\n",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=1.0, p=0.9)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.9,
+      "temperature": 1.0,
+      "full_output": "The old woman gave them to him, and found himself to the\nlady sprang out of his head. Then she let him down in his hea",
+      "generated_only": " them to him, and found himself to the\nlady sprang out of his head. Then she let him down in his hea",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=1.0, p=0.95)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.95,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him the chest to his box, and when the\nwind golden saddle of the chest; but the shore seemed very s",
+      "generated_only": " him the chest to his box, and when the\nwind golden saddle of the chest; but the shore seemed very s",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=0.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.5,
+      "full_output": "The old woman gave him a cow, and the fire and said, ‘Why do you\nwant to go to the first beautiful that I am!’ cried t",
+      "generated_only": " him a cow, and the fire and said, ‘Why do you\nwant to go to the first beautiful that I am!’ cried t",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=0.8, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 0.8,
+      "full_output": "The old woman gave him a great feast, and all he\nare so much back to the tower, and said to the countryman, ‘I will no",
+      "generated_only": " him a great feast, and all he\nare so much back to the tower, and said to the countryman, ‘I will no",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=1.0, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him a wicked dream.\n\nThe third day, however, was ready, and as he could not find them and\npanced of",
+      "generated_only": " him a wicked dream.\n\nThe third day, however, was ready, and as he could not find them and\npanced of",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-p (T=1.5, p=0.85)",
+      "do_sample": true,
+      "top_k": null,
+      "top_p": 0.85,
+      "temperature": 1.5,
+      "full_output": "The old woman gave the pig under the golden pair.\nWhen it had got on the world?’ ‘To stone,’ said Hans, ‘I am not far ",
+      "generated_only": " the pig under the golden pair.\nWhen it had got on the world?’ ‘To stone,’ said Hans, ‘I am not far ",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-k (T=1.0, k=5)",
+      "do_sample": true,
+      "top_k": 5,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him a little boy, and the king said: ‘He does not\nstand there, and the white dove--what has brought",
+      "generated_only": " him a little boy, and the king said: ‘He does not\nstand there, and the white dove--what has brought",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-k (T=1.0, k=20)",
+      "do_sample": true,
+      "top_k": 20,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him any more. But the king’s daughter said, ‘I will\nnot have a ladder in his side.’ ‘No,’ answered ",
+      "generated_only": " him any more. But the king’s daughter said, ‘I will\nnot have a ladder in his side.’ ‘No,’ answered ",
+      "error": null
+    },
+    {
+      "prompt": "The old woman gave",
+      "config_name": "Top-k (T=1.0, k=50)",
+      "do_sample": true,
+      "top_k": 50,
+      "top_p": null,
+      "temperature": 1.0,
+      "full_output": "The old woman gave him a good ring in dazzling, and was also were so stirred\nto his kingdom; but the king said, ‘Alas!",
+      "generated_only": " him a good ring in dazzling, and was also were so stirred\nto his kingdom; but the king said, ‘Alas!",
+      "error": null
+    }
+  ]
+}

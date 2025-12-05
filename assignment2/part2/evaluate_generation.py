@@ -110,6 +110,7 @@ def main():
             {"name": "Top-p (T=1.0, p=0.5)", "do_sample": True, "top_k": None, "top_p": 0.5, "temperature": 1.0},
             {"name": "Top-p (T=1.0, p=0.6)", "do_sample": True, "top_k": None, "top_p": 0.6, "temperature": 1.0},
             {"name": "Top-p (T=1.0, p=0.8)", "do_sample": True, "top_k": None, "top_p": 0.8, "temperature": 1.0},
+            {"name": "Top-p (T=1.0, p=0.85)", "do_sample": True, "top_k": None, "top_p": 0.85, "temperature": 1.0},
             {"name": "Top-p (T=1.0, p=0.9)", "do_sample": True, "top_k": None, "top_p": 0.9, "temperature": 1.0},
             {"name": "Top-p (T=1.0, p=0.95)", "do_sample": True, "top_k": None, "top_p": 0.95, "temperature": 1.0},
             
