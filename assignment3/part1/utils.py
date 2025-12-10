@@ -117,8 +117,24 @@ def visualize_manifold(decoder, grid_size=20):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    img_grid = None
-    raise NotImplementedError
+    device = decoder.device
+    percentiles = torch.linspace(0.5/grid_size, (grid_size-0.5)/grid_size, grid_size, device=device)
+    
+    dist = torch.distributions.Normal(0, 1)
+    z = dist.icdf(percentiles.flatten())
+    z1, z2 = torch.meshgrid(z, z, indexing='ij') # [grid_size, grid_size] -> [grid_size**2, 2]
+    z = torch.stack([z1.flatten(), z2.flatten()], dim=-1) # [grid_size**2, 2]
+    decoder.eval()
+    logits = decoder(z) # [grid_size**2, 16, 28, 28]
+    # converting logits to probabilities
+    probs = torch.softmax(logits, dim=1)  # [grid_size**2, 16, H, W] -> [grid_size**2, 16, H, W]
+    pixel_values = torch.arange(probs.shape[1], device=device).float() # [16]
+    # said to present the decoder's output means, not binarized samples of those
+    x_mean = (probs * pixel_values[None, :, None, None]).sum(dim=1, keepdim=True) / 15.0 # pixel_values[None, :, None, None].shape = [1, 16, 1, 1]
+    
+    img_grid = make_grid(x_mean, nrow=grid_size, pad_value=0.5)
+    
+    
     #######################
     # END OF YOUR CODE    #
     #######################
