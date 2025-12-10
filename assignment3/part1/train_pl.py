@@ -74,10 +74,12 @@ class VAE(pl.LightningModule):
         L_reg = None
         bpd = None
         mean, log_std = self.encoder(imgs)
-        z = sample_reparameterize(mean, log_std.exp())
-        x_reconstructed = self.decoder(z)
-        L_rec = F.cross_entropy(x_reconstructed, imgs[:, 0], reduction='mean')
-        L_reg = KLD(mean, log_std)
+        z = sample_reparameterize(mean, torch.exp(log_std))
+        x_reconstructed = self.decoder(z) # [B, C, H, W] C=16
+        L_rec = F.cross_entropy(x_reconstructed, imgs[:, 0], reduction='none')
+        # sum over spatial dimensions and then mean over batch
+        L_rec = L_rec.sum(dim=(1,2)).mean()
+        L_reg = KLD(mean, log_std).mean()
         bpd = elbo_to_bpd(L_rec + L_reg, imgs.shape)
         #######################
         # END OF YOUR CODE    #

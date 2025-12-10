@@ -37,7 +37,7 @@ def sample_reparameterize(mean, std):
     #######################
     z = None
     epsilon = torch.randn_like(mean)
-    z = z * std + mean
+    z = epsilon * std + mean
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -85,7 +85,7 @@ def elbo_to_bpd(elbo, img_shape):
     #######################
     bpd = None
     # img_shape[1:] since we need to exclude the batch size
-    factor = torch.log2(torch.e) / (torch.prod(torch.tensor(img_shape[1:])))
+    factor = torch.log2(torch.tensor(torch.e)) * 1.0 / (torch.prod(torch.tensor(img_shape[1:])))
     bpd = factor * elbo
     #######################
     # END OF YOUR CODE    #
