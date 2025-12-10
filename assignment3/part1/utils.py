@@ -36,7 +36,8 @@ def sample_reparameterize(mean, std):
     # PUT YOUR CODE HERE  #
     #######################
     z = None
-    raise NotImplementedError
+    epsilon = torch.randn_like(mean)
+    z = z * std + mean
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -59,7 +60,11 @@ def KLD(mean, log_std):
     # PUT YOUR CODE HERE  #
     #######################
     KLD = None
-    raise NotImplementedError
+    two_log_std = 2 * log_std
+    mu_sq = mean ** 2
+    kld_per_d = (torch.exp(two_log_std) + mu_sq - 1 - two_log_std)
+    # better so multiply 0.5 in the end to reduce number of multiplications
+    KLD = 0.5 * kld_per_d.sum(dim=-1)
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -79,7 +84,9 @@ def elbo_to_bpd(elbo, img_shape):
     # PUT YOUR CODE HERE  #
     #######################
     bpd = None
-    raise NotImplementedError
+    # img_shape[1:] since we need to exclude the batch size
+    factor = torch.log2(torch.e) / (torch.prod(torch.tensor(img_shape[1:])))
+    bpd = factor * elbo
     #######################
     # END OF YOUR CODE    #
     #######################

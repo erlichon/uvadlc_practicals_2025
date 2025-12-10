@@ -27,7 +27,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 from mnist import mnist
 from cnn_encoder_decoder import CNNEncoder, CNNDecoder
-from utils import *
+from utils import sample_reparameterize, KLD, elbo_to_bpd, visualize_manifold
 
 
 class VAE(pl.LightningModule):
@@ -73,7 +73,12 @@ class VAE(pl.LightningModule):
         L_rec = None
         L_reg = None
         bpd = None
-        raise NotImplementedError
+        mean, log_std = self.encoder(imgs)
+        z = sample_reparameterize(mean, log_std.exp())
+        x_reconstructed = self.decoder(z)
+        L_rec = F.cross_entropy(x_reconstructed, imgs[:, 0], reduction='mean')
+        L_reg = KLD(mean, log_std)
+        bpd = elbo_to_bpd(L_rec + L_reg, imgs.shape)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -91,8 +96,17 @@ class VAE(pl.LightningModule):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+        # infer num_input_channels from the encoder
+        num_input_channels = self.encoder.net[0].in_channels
         x_samples = None
-        raise NotImplementedError
+        z = torch.randn(batch_size, self.hparams.z_dim, device=self.decoder.device) # [B, z_dim]
+        logits = self.decoder(z) # x_samples are logits and not probabilities of shape [B, C, H, W]
+        B, C, H, W = logits.shape
+        # converting logits to probabilities
+        logits = logits.permute(0, 2, 3, 1).reshape(-1, C) # [B, C, H, W] -> [B*H*W, C]
+        probabilities = F.softmax(logits, dim=-1) # [B*H*W, C] -> [B*H*W, C]
+        x_samples = torch.multinomial(probabilities, num_samples=1).squeeze(-1) # [B*H*W, 1] -> [B*H*W]
+        x_samples = x_samples.reshape(B, num_input_channels,H, W) # [B*H*W] -> [B, 1, H, W] (MNIST has 1 channel in the image)
         #######################
         # END OF YOUR CODE    #
         #######################
