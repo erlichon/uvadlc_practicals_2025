@@ -36,7 +36,7 @@ def sample_reparameterize(mean, std):
     # PUT YOUR CODE HERE  #
     #######################
     z = None
-    epsilon = torch.randn_like(mean)
+    epsilon = torch.randn_like(mean, device=mean.device)
     z = epsilon * std + mean
     #######################
     # END OF YOUR CODE    #
