@@ -32,7 +32,7 @@ from utils import sample_reparameterize, KLD, elbo_to_bpd, visualize_manifold
 
 class VAE(pl.LightningModule):
 
-    def __init__(self, num_filters, z_dim, lr):
+    def __init__(self, num_filters, z_dim, lr, beta=1.0):
         """
         PyTorch Lightning module that summarizes all components to train a VAE.
         Inputs:
@@ -79,7 +79,8 @@ class VAE(pl.LightningModule):
         L_rec = F.cross_entropy(x_reconstructed, imgs[:, 0], reduction='none')
         # sum over spatial dimensions and then mean over batch
         L_rec = L_rec.sum(dim=(1,2)).mean()
-        L_reg = KLD(mean, log_std).mean()
+        # apply beta to the regularization loss
+        L_reg = self.hparams.beta * KLD(mean, log_std).mean()
         bpd = elbo_to_bpd(L_rec + L_reg, imgs.shape)
         #######################
         # END OF YOUR CODE    #
@@ -215,7 +216,9 @@ def train_vae(args):
     pl.seed_everything(args.seed)  # To be reproducible
     model = VAE(num_filters=args.num_filters,
                 z_dim=args.z_dim,
-                lr=args.lr)
+                lr=args.lr,
+                # beta is a hyperparameter for the beta-VAE loss
+                beta=args.beta)
 
     # Training
     gen_callback.sample_and_save(trainer, model, epoch=0)  # Initial sample
@@ -251,6 +254,10 @@ if __name__ == '__main__':
                         help='Learning rate to use')
     parser.add_argument('--batch_size', default=128, type=int,
                         help='Minibatch size')
+    
+    # loss hyperparameters
+    parser.add_argument("--beta", default=1.0, type=float,
+                        help="Beta for the beta-VAE loss")
 
     # Other hyperparameters
     parser.add_argument('--data_dir', default='../data/', type=str,
