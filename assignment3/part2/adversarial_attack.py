@@ -32,6 +32,7 @@ def fgsm_attack(image, data_grad, epsilon = 0.25):
     # Make sure values stay within valid range
     perturbed_image = image + epsilon * data_grad.sign()
     perturbed_image = torch.clamp(perturbed_image, 0, 1)
+    perturbed_image = perturbed_image.detach()
     return perturbed_image
 
 
@@ -81,7 +82,7 @@ def pgd_attack(model, data, target, criterion, args):
         
         output = model(perturbed_data)
         loss = criterion(output, target)
-        data_grad = torch.autograd.grad(loss, perturbed_data, retain_graph=True)[0]
+        data_grad = torch.autograd.grad(loss, perturbed_data)[0]
         # use no_grad for the update step to avoid accumulating gradients
         with torch.no_grad():
             # Take step in gradient sign direction
@@ -92,6 +93,7 @@ def pgd_attack(model, data, target, criterion, args):
             # clamp to valid image range
             perturbed_data = torch.clamp(perturbed_data, 0, 1)
     
+    perturbed_data = perturbed_data.detach()
     return perturbed_data
 
 
@@ -110,8 +112,8 @@ def test_attack(model, test_loader, attack_function, attack_args):
         if init_pred.item() != target.item():
             continue
 
-        # loss = F.nll_loss(output, target)
-        loss = criterion(output, target)
+        loss = F.nll_loss(output, target)
+        # loss = criterion(output, target)
         # ce_loss = criterion(output, target)
         model.zero_grad()
         
@@ -119,7 +121,7 @@ def test_attack(model, test_loader, attack_function, attack_args):
             # Get the correct gradients wrt the data
             # Perturb the data using the FGSM attack
             # Re-classify the perturbed image
-            data_grad = torch.autograd.grad(loss, data, retain_graph=True)[0]
+            data_grad = torch.autograd.grad(loss, data)[0]
             perturbed_data = fgsm_attack(data, data_grad, attack_args[EPSILON])
             output = model(perturbed_data)
 
